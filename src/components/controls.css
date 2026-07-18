@@ -1,0 +1,56 @@
+.control-panel {
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 14px;
+  padding: 20px;
+  width: 320px;
+  box-shadow:
+    rgba(0, 0, 0, 0.05) 0px 2px 4px,
+    rgba(0, 0, 0, 0.08) 0px 4px 8px;
+}
+
+.control-title {
+  margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.control-row label {
+  width: 160px;
+  font-size: 14px;
+}
+
+.control-row input {
+  flex: 1;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+}
+
+.percent {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.apply-button {
+  margin-top: 16px;
+  width: 100%;
+  padding: 10px;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.apply-button:hover {
+  background: #4338ca;
+}
