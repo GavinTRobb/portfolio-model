@@ -45,7 +45,7 @@
 
 /* DISTINCT COLOURS + MATCHING DARKER BORDERS */
 .dashboard-box:nth-child(1) {
-  background: #f8fafc;          /* light grey */
+  background: #d1fae5;          /* light grey changed to green*/
   border: 1px solid #d1d5db;    /* darker grey */
 }
 
