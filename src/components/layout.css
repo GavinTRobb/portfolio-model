@@ -1,0 +1,75 @@
+/* GLOBAL: ensure padding/borders never cause overflow */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* OUTER WRAPPER: adds clean white space around the dashboard */
+.layout-wrapper {
+  height: 100%;
+  width: 100%;
+  padding: 24px 24px 48px 24px; /* extra bottom space */
+  background: #ffffff;          /* ensures gaps are white */
+  box-sizing: border-box;
+}
+
+/* MAIN GRID: 3×3 matrix with safe fractional sizing */
+.layout-grid {
+  display: grid;
+  height: 100%;
+  width: 100%;
+
+  /* Vertical split: 20% / 80% */
+  grid-template-rows: 20% 80%;
+
+  /* Horizontal split: 1fr / 3fr / 1fr (never overflows) */
+  grid-template-columns: 1fr 3fr 1fr;
+
+  gap: 24px; /* white space between boxes */
+}
+
+/* DASHBOARD BOXES: modern card look */
+.dashboard-box {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  border-radius: 14px;
+  padding: 16px;
+
+  box-shadow:
+    rgba(0, 0, 0, 0.05) 0px 2px 4px,
+    rgba(0, 0, 0, 0.08) 0px 4px 8px;
+}
+
+/* DISTINCT COLOURS + MATCHING DARKER BORDERS */
+.dashboard-box:nth-child(1) {
+  background: #f8fafc;          /* light grey */
+  border: 1px solid #d1d5db;    /* darker grey */
+}
+
+.dashboard-box:nth-child(2) {
+  background: #eef2ff;          /* soft indigo */
+  border: 1px solid #c7d2fe;    /* darker indigo */
+}
+
+.dashboard-box:nth-child(3) {
+  background: #fef3c7;          /* pale amber */
+  border: 1px solid #fcd34d;    /* darker amber */
+}
+
+.dashboard-box:nth-child(4) {
+  background: #ecfdf5;          /* mint */
+  border: 1px solid #6ee7b7;    /* darker mint */
+}
+
+.dashboard-box:nth-child(5) {
+  background: #eff6ff;          /* pale blue */
+  border: 1px solid #93c5fd;    /* darker blue */
+}
+
+.dashboard-box:nth-child(6) {
+  background: #fce7f3;          /* rose */
+  border: 1px solid #f9a8d4;    /* darker rose */
+}
