@@ -51,7 +51,7 @@ export default function DrawdownPanel({
           type="number"
           value={drawdownStartYear}
           onChange={(e) => onDrawdownStartYearChange(Number(e.target.value))}
-          style={{ width: 100 }}
+          style={{ width: 80 }}
         />
       </div>
 
