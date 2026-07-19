@@ -49,10 +49,10 @@ export default function PortfolioControlsPanel({ onApply, portfolio, crashYear }
       <h2 className="control-title">Growth Rates</h2>
 
       {/* HEADER ROW */}
-      <div className="control-row" style={{ fontWeight: 600 }}>
-        <label style={{ width: 140 }}>Asset</label>
-        <label style={{ width: 80 }}>Growth (%)</label>
-        <label style={{ width: 100 }}>Allocation (%)</label>
+      <div className="control-row" style={{ fontWeight: 600, marginBottom: 10 }}>
+        <label style={{ width: 140, textAlign: "left" }}>Asset</label>
+        <label style={{ width: 96, textAlign: "center" }}>Growth (%)</label>
+        <label style={{ width: 106, textAlign: "center" }}>Allocation (%)</label>
       </div>
 
       {/* EQUITY */}

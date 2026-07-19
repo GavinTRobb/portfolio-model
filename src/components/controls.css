@@ -30,6 +30,26 @@
   font-size: 13px;
 }
 
+.control-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 10px;
+}
+
+.control-group label {
+  width: 140px;
+  font-size: 13px;
+}
+
+.control-group input {
+  flex: 1;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 13px;
+}
+
 .percent {
   font-size: 13px;
   font-weight: 600;

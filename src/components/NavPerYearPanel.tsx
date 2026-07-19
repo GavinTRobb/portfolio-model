@@ -1,136 +1,161 @@
-import { useEffect, useState } from "react";
-import { GrowthRow } from "./GrowthByYearPanel";
+import { useEffect, useMemo, useState } from "react";
 
 interface Props {
-  period: number;
-  portfolio: number;
-
-  equityAlloc: number;
-  bondAlloc: number;
-  mmfAlloc: number;
-
+  navRows: {
+    year: number;
+    endValue: number;
+    crashApplied?: boolean;
+    drawdownApplied?: boolean;
+    growthRate?: number;
+  }[];
+  growthTable: Array<{
+    year: number;
+    equityRate: number;
+    bondRate: number;
+    mmfRate: number;
+    equityAlloc: number;
+    bondAlloc: number;
+    mmfAlloc: number;
+  }>;
+  initialPortfolioValue: number;
+  drawdownStartYear: number;
   drawdownYear: number;
   drawdownAmount: number;
-
-  growthTable: GrowthRow[];
-  resetTrigger: number;
-
-  onNavChange: (rows: NavRow[]) => void;
-}
-
-interface NavRow {
-  year: number;
-  start: number;
-  eqGrowth: number;
-  bdGrowth: number;
-  mmfGrowth: number;
-  interim: number;
-  drawdown: number;
-  drawdownPct: number;
-  end: number;
+  onApplyDrawdownChanges?: (values: number[]) => void;
 }
 
 export default function NavPerYearPanel({
-  period,
-  portfolio,
-
-  equityAlloc,
-  bondAlloc,
-  mmfAlloc,
-
+  navRows,
+  growthTable,
+  initialPortfolioValue,
+  drawdownStartYear,
   drawdownYear,
   drawdownAmount,
-
-  growthTable,
-  resetTrigger,
-
-  onNavChange
+  onApplyDrawdownChanges
 }: Props) {
-  const [rows, setRows] = useState<NavRow[]>([]);
-  const [draftRows, setDraftRows] = useState<NavRow[]>([]);
-
-  const recalc = (useDraft = false) => {
-    if (!growthTable || growthTable.length === 0) return;
-
-    const newRows: NavRow[] = [];
-    let startValue = portfolio;
-
-    for (let i = 0; i < period; i++) {
-      const yr = 2026 + i;
-
-      const equityRate = growthTable[i]?.equity ?? 0;
-      const bondRate = growthTable[i]?.bonds ?? 0;
-      const mmfRate = growthTable[i]?.mmf ?? 0;
-
-      const eqGrowth = startValue * (equityAlloc / 100) * (equityRate / 100);
-      const bdGrowth = startValue * (bondAlloc / 100) * (bondRate / 100);
-      const mmfGrowth = startValue * (mmfAlloc / 100) * (mmfRate / 100);
-
-      const interim = startValue + eqGrowth + bdGrowth + mmfGrowth;
-
-      const drawdown = useDraft
-        ? draftRows[i].drawdown
-        : yr >= drawdownYear
-        ? drawdownAmount
-        : 0;
-
-      const drawdownPct = drawdown > 0 ? (drawdown / interim) * 100 : 0;
-
-      const endValue = interim - drawdown;
-
-      newRows.push({
-        year: yr,
-        start: startValue,
-        eqGrowth,
-        bdGrowth,
-        mmfGrowth,
-        interim,
-        drawdown,
-        drawdownPct,
-        end: endValue
-      });
-
-      startValue = endValue;
-    }
-
-    setRows(newRows);
-    setDraftRows(newRows);
-    onNavChange(newRows);
-  };
-
-  useEffect(() => {
-    recalc(false);
-  }, [
-    period,
-    portfolio,
-    equityAlloc,
-    bondAlloc,
-    mmfAlloc,
-    drawdownYear,
-    drawdownAmount,
-    growthTable,
-    resetTrigger
-  ]);
-
-  const editDrawdown = (index: number, value: number) => {
-    const updated = [...draftRows];
-    updated[index].drawdown = value;
-    setDraftRows(updated);
-  };
-
   const fmt = (v: number) =>
     v.toLocaleString("en-US", { maximumFractionDigits: 0 });
 
   const fmtPct = (v: number) =>
     v.toLocaleString("en-US", { maximumFractionDigits: 2 });
 
+  const formatInputValue = (value: number) =>
+    value.toLocaleString("en-US", { maximumFractionDigits: 0 });
+
+  const getDefaultDrawdownValue = (index: number) => {
+    const row = navRows[index];
+    if (!row) return 0;
+    const defaultDrawdown =
+      row.year >= drawdownYear && row.year >= drawdownStartYear ? drawdownAmount : 0;
+    return defaultDrawdown > 0 ? -defaultDrawdown : 0;
+  };
+
+  const [draftDrawdowns, setDraftDrawdowns] = useState<string[]>(() =>
+    navRows.map((_, index) => formatInputValue(getDefaultDrawdownValue(index)))
+  );
+
+  useEffect(() => {
+    setDraftDrawdowns((prev) => {
+      if (prev.length === navRows.length) {
+        return prev;
+      }
+
+      return navRows.map((_, index) => formatInputValue(getDefaultDrawdownValue(index)));
+    });
+  }, [navRows.length, drawdownStartYear, drawdownYear, drawdownAmount]);
+
+  const parseDraftValue = (rawValue: string | undefined, fallback: number) => {
+    const cleanedValue = (rawValue ?? "").replace(/,/g, "").trim();
+    if (cleanedValue === "") {
+      return fallback;
+    }
+
+    const parsedValue = Number(cleanedValue);
+    return Number.isNaN(parsedValue) ? fallback : parsedValue;
+  };
+
+  const rowResults = useMemo(() => {
+    return navRows.reduce<
+    Array<{
+      startValue: number;
+      eqGrowth: number;
+      bdGrowth: number;
+      mmfGrowth: number;
+      interimValue: number;
+      drawdownValue: number;
+      drawdownPct: number;
+      endValue: number;
+    }>
+    >((acc, row, idx) => {
+      const startValue = idx === 0 ? initialPortfolioValue : acc[idx - 1].endValue;
+      const growthRow = growthTable[idx];
+
+      const eqGrowth = growthRow
+        ? startValue * (growthRow.equityAlloc / 100) * (growthRow.equityRate / 100)
+        : 0;
+      const bdGrowth = growthRow
+        ? startValue * (growthRow.bondAlloc / 100) * (growthRow.bondRate / 100)
+        : 0;
+      const mmfGrowth = growthRow
+        ? startValue * (growthRow.mmfAlloc / 100) * (growthRow.mmfRate / 100)
+        : 0;
+
+      const interimValue = startValue + eqGrowth + bdGrowth + mmfGrowth;
+      const defaultDrawdownValue = getDefaultDrawdownValue(idx);
+      const drawdownValue = parseDraftValue(draftDrawdowns[idx], defaultDrawdownValue);
+      const drawdownPct =
+        interimValue !== 0 ? (drawdownValue / interimValue) * 100 : 0;
+      const endValue = interimValue + drawdownValue;
+
+      acc.push({
+        startValue,
+        eqGrowth,
+        bdGrowth,
+        mmfGrowth,
+        interimValue,
+        drawdownValue,
+        drawdownPct,
+        endValue
+      });
+
+      return acc;
+    }, []);
+  }, [draftDrawdowns, drawdownAmount, drawdownStartYear, drawdownYear, growthTable, initialPortfolioValue, navRows]);
+
+  const startValues = rowResults.map((row) => row.startValue);
+  const eqGrowthValues = rowResults.map((row) => row.eqGrowth);
+  const bdGrowthValues = rowResults.map((row) => row.bdGrowth);
+  const mmfGrowthValues = rowResults.map((row) => row.mmfGrowth);
+  const interimValues = rowResults.map((row) => row.interimValue);
+  const drawdownValues = rowResults.map((row) => row.drawdownValue);
+  const drawdownPctValues = rowResults.map((row) => row.drawdownPct);
+  const endValues = rowResults.map((row) => row.endValue);
+
+  const handleDrawdownInput = (index: number, rawValue: string) => {
+    setDraftDrawdowns((prev) => {
+      const updated = [...prev];
+      updated[index] = rawValue;
+      return updated;
+    });
+  };
+
+  const handleApplyDrawdownChanges = () => {
+    const values = draftDrawdowns.map((rawValue, index) => {
+      const fallback = getDefaultDrawdownValue(index);
+      const parsedValue = parseDraftValue(rawValue, fallback);
+      return parsedValue < 0 ? parsedValue : -Math.abs(parsedValue);
+    });
+
+    onApplyDrawdownChanges?.(values);
+  };
+
   return (
     <div className="panel-container">
       <h2 className="control-title">NAV per Year</h2>
 
       <div className="bottom-align" style={{ marginBottom: "10px" }}>
-        <button className="apply-button" onClick={() => recalc(true)}>
-          Apply Drawdown Adjustments
+        <button className="apply-button" onClick={handleApplyDrawdownChanges}>
+          Apply Drawdown Changes
         </button>
       </div>
 
@@ -139,39 +164,36 @@ export default function NavPerYearPanel({
           <thead>
             <tr>
               <th>Year</th>
-              <th>Start</th>
+              <th>Start Value</th>
               <th>EQ Growth</th>
               <th>BD Growth</th>
               <th>MMF Growth</th>
-              <th>Interim</th>
+              <th>Interim Value</th>
               <th>Drawdown</th>
               <th>Drawdown %</th>
-              <th>End</th>
+              <th>End Value</th>
             </tr>
           </thead>
 
           <tbody>
-            {draftRows.map((row, idx) => (
+            {navRows.map((row, idx) => (
               <tr key={idx}>
                 <td>{row.year}</td>
-                <td>{fmt(row.start)}</td>
-                <td>{fmt(row.eqGrowth)}</td>
-                <td>{fmt(row.bdGrowth)}</td>
-                <td>{fmt(row.mmfGrowth)}</td>
-                <td>{fmt(row.interim)}</td>
-
+                <td>{fmt(startValues[idx])}</td>
+                <td>{fmt(eqGrowthValues[idx])}</td>
+                <td>{fmt(bdGrowthValues[idx])}</td>
+                <td>{fmt(mmfGrowthValues[idx])}</td>
+                <td>{fmt(interimValues[idx])}</td>
                 <td>
                   <input
-                    type="number"
-                    value={row.drawdown}
-                    onChange={(e) =>
-                      editDrawdown(idx, Number(e.target.value))
-                    }
+                    type="text"
+                    value={draftDrawdowns[idx] ?? ""}
+                    onChange={(e) => handleDrawdownInput(idx, e.target.value)}
+                    style={{ width: 100 }}
                   />
                 </td>
-
-                <td>{fmtPct(row.drawdownPct)}%</td>
-                <td>{fmt(row.end)}</td>
+                <td>{fmtPct(drawdownPctValues[idx])}%</td>
+                <td>{fmt(endValues[idx])}</td>
               </tr>
             ))}
           </tbody>

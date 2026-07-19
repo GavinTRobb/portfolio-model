@@ -4,6 +4,9 @@ interface Props {
   portfolio: number;
   onPortfolioChange: (value: number) => void;
 
+  age: number;
+  onAgeChange: (value: number) => void;
+
   crashYear: number;
   onCrashYearChange: (year: number) => void;
 
@@ -20,6 +23,9 @@ interface Props {
 export default function CrashYearPanel({
   portfolio,
   onPortfolioChange,
+
+  age,
+  onAgeChange,
 
   crashYear,
   onCrashYearChange,
@@ -51,24 +57,33 @@ export default function CrashYearPanel({
       {/* TITLE */}
       <h2 className="control-title">Portfolio</h2>
 
-      {/* TOP LINE */}
       <div className="control-row">
         <label>Portfolio Value</label>
         <input
           type="text"
           value={formatNumber(portfolio)}
           onChange={handlePortfolioInput}
+          style={{ width: 120, maxWidth: 120 }}
         />
+        <label style={{ width: 60, marginLeft: 8 }}>Age</label>
+        <input
+          type="number"
+          value={age}
+          onChange={(e) => onAgeChange(Number(e.target.value))}
+          style={{ width: 70, maxWidth: 70 }}
+        />
+      </div>
 
+      <div className="control-row">
         <label>Period</label>
         <input
           type="number"
           value={period}
           onChange={(e) => onPeriodChange(Number(e.target.value))}
+          style={{ width: 90, maxWidth: 90 }}
         />
       </div>
 
-      {/* SECOND LINE */}
       <div className="control-row">
         <label>Crash %</label>
         <input
@@ -76,15 +91,19 @@ export default function CrashYearPanel({
           step="1"
           value={crashPercent}
           onChange={(e) => onCrashPercentChange(Number(e.target.value))}
+          style={{ width: 70, maxWidth: 70 }}
         />
         <span className="percent">%</span>
+      </div>
 
+      <div className="control-row">
         <label>Interest Rate Change</label>
         <input
           type="number"
           step="0.1"
           value={interestRateChange}
           onChange={(e) => onInterestRateChange(Number(e.target.value))}
+          style={{ width: 70, maxWidth: 70 }}
         />
         <span className="percent">%</span>
       </div>

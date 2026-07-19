@@ -39,31 +39,31 @@
 }
 
 .dashboard-box:nth-child(1) {
-  background: #d1fae5;
-  border: 1px solid #d1d5db;
+  background: #f3f4f6;
+  border: 1px solid #4b5563;
 }
 
 .dashboard-box:nth-child(2) {
-  background: #eef2ff;
-  border: 1px solid #c7d2fe;
+  background: #f3f4f6;
+  border: 1px solid #4b5563;
 }
 
 .dashboard-box:nth-child(3) {
-  background: #fef3c7;
-  border: 1px solid #fcd34d;
+  background: #f3f4f6;
+  border: 1px solid #4b5563;
 }
 
 .dashboard-box:nth-child(4) {
-  background: #ecfdf5;
-  border: 1px solid #6ee7b7;
+  background: #f3f4f6;
+  border: 1px solid #4b5563;
 }
 
 .dashboard-box:nth-child(5) {
-  background: #eff6ff;
-  border: 1px solid #93c5fd;
+  background: #f3f4f6;
+  border: 1px solid #4b5563;
 }
 
 .dashboard-box:nth-child(6) {
-  background: #fce7f3;
-  border: 1px solid #f9a8d4;
+  background: #f3f4f6;
+  border: 1px solid #4b5563;
 }

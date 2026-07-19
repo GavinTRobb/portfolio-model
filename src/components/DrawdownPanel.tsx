@@ -2,10 +2,13 @@ import { useState } from "react";
 
 interface Props {
   drawdownYear: number;
-  onDrawdownYearChange: (year: number) => void;
+  onDrawdownYearChange: (v: number) => void;
 
   drawdownAmount: number;
-  onDrawdownAmountChange: (amt: number) => void;
+  onDrawdownAmountChange: (v: number) => void;
+
+  drawdownStartYear: number;
+  onDrawdownStartYearChange: (v: number) => void;
 
   onApply: () => void;
 }
@@ -17,13 +20,15 @@ export default function DrawdownPanel({
   drawdownAmount,
   onDrawdownAmountChange,
 
+  drawdownStartYear,
+  onDrawdownStartYearChange,
+
   onApply
 }: Props) {
+  const formatNumber = (value: number) =>
+    value.toLocaleString("en-US", { maximumFractionDigits: 0 });
 
-  const formatNumber = (v: number) =>
-    v.toLocaleString("en-US", { maximumFractionDigits: 0 });
-
-  const handleAmountInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDrawdownAmountInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/,/g, "");
     const num = Number(raw);
     if (!isNaN(num)) onDrawdownAmountChange(num);
@@ -32,6 +37,15 @@ export default function DrawdownPanel({
   return (
     <div className="panel-container">
       <h2 className="control-title">Drawdown Settings</h2>
+
+      <div className="control-row">
+        <label>Start Year</label>
+        <input
+          type="number"
+          value={drawdownStartYear}
+          onChange={(e) => onDrawdownStartYearChange(Number(e.target.value))}
+        />
+      </div>
 
       <div className="control-row">
         <label>Drawdown Year</label>
@@ -47,7 +61,7 @@ export default function DrawdownPanel({
         <input
           type="text"
           value={formatNumber(drawdownAmount)}
-          onChange={handleAmountInput}
+          onChange={handleDrawdownAmountInput}
         />
       </div>
 

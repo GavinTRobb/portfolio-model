@@ -7,8 +7,9 @@ interface Props {
   bondRate: number;
   mmfRate: number;
 
-  resetTrigger: number;   // ← NEW: increments when Apply Changes is pressed
-  onApplyGrowth: (table: GrowthRow[]) => void;
+  resetTrigger: number;
+  onApplyGrowthRates: () => void;
+  onApplyGrowthAdjustments: (table: GrowthRow[]) => void;
 }
 
 export interface GrowthRow {
@@ -24,7 +25,8 @@ export default function GrowthByYearPanel({
   bondRate,
   mmfRate,
   resetTrigger,
-  onApplyGrowth
+  onApplyGrowthRates,
+  onApplyGrowthAdjustments
 }: Props) {
 
   const [rows, setRows] = useState<GrowthRow[]>([]);
@@ -49,16 +51,23 @@ export default function GrowthByYearPanel({
     setRows(updated);
   };
 
+  const handleApplyGrowthAdjustments = () => {
+    const confirmed = window.confirm(
+      "Apply these manual growth adjustments to the NAV calculation?"
+    );
+    if (!confirmed) return;
+    onApplyGrowthAdjustments(rows);
+  };
+
   return (
     <div className="panel-container">
       <h2 className="control-title">Growth by Year</h2>
 
-      {/* APPLY BUTTON ABOVE TABLE */}
       <div className="bottom-align" style={{ marginBottom: "10px" }}>
-        <button
-          className="apply-button"
-          onClick={() => onApplyGrowth(rows)}
-        >
+        <button className="apply-button" onClick={onApplyGrowthRates}>
+          Apply Growth Rates
+        </button>
+        <button className="apply-button" onClick={handleApplyGrowthAdjustments}>
           Apply Growth Adjustments
         </button>
       </div>
