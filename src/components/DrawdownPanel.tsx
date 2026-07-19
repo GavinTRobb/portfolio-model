@@ -51,15 +51,15 @@ export default function DrawdownPanel({
           type="number"
           value={drawdownStartYear}
           onChange={(e) => onDrawdownStartYearChange(Number(e.target.value))}
-          style={{ width: 80 }}
+          style={{ width: 110 }}
         />
       </div>
 
       {/* HEADERS */}
       <div className="control-row" style={{ fontWeight: 600, marginBottom: "6px" }}>
         <label style={{ width: 140 }}></label>
-        <div style={{ width: 80, textAlign: "center" }}>Scenario 1</div>
-        <div style={{ width: 80, textAlign: "center", marginLeft: "10px" }}>Scenario 2</div>
+        <div style={{ width: 110, textAlign: "center" }}>Scenario 1</div>
+        <div style={{ width: 110, textAlign: "center", marginLeft: "10px" }}>Scenario 2</div>
       </div>
 
       {/* DRAWDOWN YEAR */}
@@ -69,13 +69,13 @@ export default function DrawdownPanel({
           type="number"
           value={drawdownYearS1}
           onChange={(e) => onDrawdownYearS1Change(Number(e.target.value))}
-          style={{ width: 80 }}
+          style={{ width: 110 }}
         />
         <input
           type="number"
           value={drawdownYearS2}
           onChange={(e) => onDrawdownYearS2Change(Number(e.target.value))}
-          style={{ width: 80, marginLeft: "10px" }}
+          style={{ width: 110, marginLeft: "10px" }}
         />
       </div>
 
@@ -90,7 +90,7 @@ export default function DrawdownPanel({
             const num = Number(raw);
             if (!isNaN(num)) onDrawdownAmountS1Change(num);
           }}
-          style={{ width: 80 }}
+          style={{ width: 110 }}
         />
         <input
           type="text"
@@ -100,7 +100,7 @@ export default function DrawdownPanel({
             const num = Number(raw);
             if (!isNaN(num)) onDrawdownAmountS2Change(num);
           }}
-          style={{ width: 80, marginLeft: "10px" }}
+          style={{ width: 110, marginLeft: "10px" }}
         />
       </div>
 
