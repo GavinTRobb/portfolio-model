@@ -292,14 +292,14 @@ function App() {
       });
     } else if (normalizedQ.includes("drawdown") || normalizedQ.includes("afford")) {
       // Question 3: Affordable Drawdown
-      const runCalc = (growthTable: any[]) => {
+      const runCalc = (growthTable: any[], corrDrawdownYear: number) => {
         const r1 = simulate({
           portfolioValue,
           period,
           startYear,
           growthTable,
           correctedDrawdownStart,
-          correctedDrawdownYear,
+          correctedDrawdownYear: corrDrawdownYear,
           drawdownAmount: 0,
           drawdownOverrides: Array(period).fill(undefined),
           correctedCrashYear
@@ -312,7 +312,7 @@ function App() {
           startYear,
           growthTable,
           correctedDrawdownStart,
-          correctedDrawdownYear,
+          correctedDrawdownYear: corrDrawdownYear,
           drawdownAmount: 100_000,
           drawdownOverrides: Array(period).fill(undefined),
           correctedCrashYear
@@ -325,8 +325,8 @@ function App() {
         return { possible: true, value: Math.max(0, affordableD) };
       };
 
-      const resS1 = runCalc(growthTableS1);
-      const resS2 = runCalc(growthTableS2);
+      const resS1 = runCalc(growthTableS1, correctedDrawdownYearS1);
+      const resS2 = runCalc(growthTableS2, correctedDrawdownYearS2);
 
       const answerS1 = resS1.possible
         ? `In Scenario 1, you can afford an annual drawdown of ${resS1.value.toLocaleString("en-US", { maximumFractionDigits: 0 })} each year without NAV loss.`
@@ -603,7 +603,7 @@ function App() {
     crashPercent,
     interestRateChange,
     correctedDrawdownStart,
-    correctedDrawdownYear,
+    correctedDrawdownYearS1,
     drawdownAmountS1,
     drawdownOverridesS1,
     growthTableS1
@@ -674,7 +674,7 @@ function App() {
     portfolioValue,
     correctedCrashYear,
     correctedDrawdownStart,
-    correctedDrawdownYear,
+    correctedDrawdownYearS2,
     drawdownAmountS2,
     drawdownOverridesS2,
     growthTableS2
