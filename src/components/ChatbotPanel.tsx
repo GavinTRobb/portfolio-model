@@ -9,6 +9,7 @@ export default function ChatbotPanel({ onAsk, onRevertToDefaults }: Props) {
   const [question, setQuestion] = useState("");
 
   const examples = [
+    "what growth do I need to maintain NAV",
     "what does my portfolio value need to be to maintain my drawdowns without significant NAV loss",
     "what is my optimum portfolio allocation before the crash to maximise my end NAV",
     "what drawdown can I afford each year without NAV loss"

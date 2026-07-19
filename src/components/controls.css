@@ -10,6 +10,62 @@
   font-weight: 600;
 }
 
+.panel-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.panel-title-input {
+  width: 104px;
+  max-width: 104px;
+  padding: 6px 8px;
+  border-radius: 0;
+  border: 1px solid #94a3b8;
+  font-size: 13px;
+}
+
+.compact-percent-input {
+  width: 76px;
+  max-width: 76px;
+}
+
+.compact-value-input {
+  width: 96px;
+  max-width: 96px;
+}
+
+.growth-rates-grid-header,
+.growth-rates-grid-row {
+  display: grid;
+  grid-template-columns: max-content 88px 88px;
+  align-items: center;
+  justify-content: start;
+  gap: 10px;
+  width: fit-content;
+}
+
+.growth-rates-grid-header {
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.growth-rates-grid-row {
+  margin-bottom: 8px;
+}
+
+.growth-rates-grid-row label {
+  font-size: 13px;
+}
+
+.growth-rates-grid-row input,
+.growth-rates-grid-header > div {
+  justify-self: start;
+}
+
 .control-row {
   display: flex;
   align-items: center;
@@ -24,9 +80,9 @@
 
 .control-row input {
   flex: 1;
-  padding: 4px 6px;
-  border-radius: 6px;
-  border: 1px solid #cbd5e1;
+  padding: 6px 8px;
+  border-radius: 0;
+  border: 1px solid #94a3b8;
   font-size: 13px;
 }
 
@@ -44,9 +100,9 @@
 
 .control-group input {
   flex: 1;
-  padding: 4px 6px;
-  border-radius: 6px;
-  border: 1px solid #cbd5e1;
+  padding: 6px 8px;
+  border-radius: 0;
+  border: 1px solid #94a3b8;
   font-size: 13px;
 }
 
@@ -58,16 +114,16 @@
 .apply-button {
   width: 100%;
   padding: 10px;
-  background: #4f46e5;
+  background: #0f766e;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 0;
   font-size: 15px;
   cursor: pointer;
 }
 
 .apply-button:hover {
-  background: #4338ca;
+  background: #115e59;
 }
 
 .bottom-align {
@@ -81,8 +137,8 @@
 .button-slider {
   width: 100%;
   height: 37px;
-  background: #4f46e5;
-  border-radius: 8px;
+  background: #1d4ed8;
+  border-radius: 0;
   appearance: none;
   cursor: pointer;
 }
@@ -93,7 +149,7 @@
   height: 22px;
   background: white;
   border-radius: 50%;
-  border: 2px solid #4338ca;
+  border: 2px solid #1d4ed8;
 }
 
 .slider-label {
@@ -109,7 +165,7 @@
 }
 
 .growth-table th {
-  background: #bfdbfe;
+  background: #dbeafe;
   padding: 6px;
   text-align: left;
   font-weight: 600;
@@ -122,6 +178,6 @@
 .growth-table input {
   width: 100%;
   padding: 4px;
-  border-radius: 6px;
-  border: 1px solid #cbd5e1;
+  border-radius: 0;
+  border: 1px solid #94a3b8;
 }

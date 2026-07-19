@@ -1,229 +1,167 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export interface PortfolioSettings {
-  portfolio: number;
-  equity: number;
-  bonds: number;
-  mmf: number;
-  crashYear: number;
-
-  equityAllocS1: number;
-  bondAllocS1: number;
-  mmfAllocS1: number;
-  equityAllocS2: number;
-  bondAllocS2: number;
-  mmfAllocS2: number;
-  equityAllocPostCrash: number;
-  bondAllocPostCrash: number;
-  mmfAllocPostCrash: number;
+  equityS1: number;
+  bondsS1: number;
+  mmfS1: number;
+  equityS2: number;
+  bondsS2: number;
+  mmfS2: number;
 }
 
 interface Props {
+  equityRateS1: number;
+  bondRateS1: number;
+  mmfRateS1: number;
+  equityRateS2: number;
+  bondRateS2: number;
+  mmfRateS2: number;
+  applyToBothScenarios: boolean;
   onApply: (settings: PortfolioSettings) => void;
-  portfolio: number;
-  crashYear: number;
 }
 
-export default function PortfolioControlsPanel({ onApply, portfolio, crashYear }: Props) {
-  // Growth rates
-  const [draftEquity, setDraftEquity] = useState<number>(8.0);
-  const [draftBonds, setDraftBonds] = useState<number>(3.5);
-  const [draftMMF, setDraftMMF] = useState<number>(1.5);
+export default function PortfolioControlsPanel({
+  equityRateS1,
+  bondRateS1,
+  mmfRateS1,
+  equityRateS2,
+  bondRateS2,
+  mmfRateS2,
+  applyToBothScenarios,
+  onApply
+}: Props) {
+  const [draftEquityS1, setDraftEquityS1] = useState<number>(equityRateS1);
+  const [draftBondsS1, setDraftBondsS1] = useState<number>(bondRateS1);
+  const [draftMMFS1, setDraftMMFS1] = useState<number>(mmfRateS1);
+  const [draftEquityS2, setDraftEquityS2] = useState<number>(equityRateS2);
+  const [draftBondsS2, setDraftBondsS2] = useState<number>(bondRateS2);
+  const [draftMMFS2, setDraftMMFS2] = useState<number>(mmfRateS2);
 
-  // Allocations
-  const [allocEquityS1, setAllocEquityS1] = useState<number>(10);
-  const [allocBondsS1, setAllocBondsS1] = useState<number>(20);
-  const [allocMMFS1, setAllocMMFS1] = useState<number>(70);
+  useEffect(() => {
+    setDraftEquityS1(equityRateS1);
+    setDraftBondsS1(bondRateS1);
+    setDraftMMFS1(mmfRateS1);
+    setDraftEquityS2(equityRateS2);
+    setDraftBondsS2(bondRateS2);
+    setDraftMMFS2(mmfRateS2);
+  }, [equityRateS1, bondRateS1, mmfRateS1, equityRateS2, bondRateS2, mmfRateS2]);
 
-  const [allocEquityS2, setAllocEquityS2] = useState<number>(50);
-  const [allocBondsS2, setAllocBondsS2] = useState<number>(40);
-  const [allocMMFS2, setAllocMMFS2] = useState<number>(10);
+  const handleRateChange = (
+    scenario: "s1" | "s2",
+    asset: "equity" | "bonds" | "mmf",
+    rawValue: string
+  ) => {
+    const value = Number(rawValue);
+    if (Number.isNaN(value)) {
+      return;
+    }
 
-  const [allocEquityPostCrash, setAllocEquityPostCrash] = useState<number>(70);
-  const [allocBondsPostCrash, setAllocBondsPostCrash] = useState<number>(20);
-  const [allocMMFPostCrash, setAllocMMFPostCrash] = useState<number>(10);
+    const applyToScenario = (targetScenario: "s1" | "s2") => {
+      if (asset === "equity") {
+        targetScenario === "s1" ? setDraftEquityS1(value) : setDraftEquityS2(value);
+      } else if (asset === "bonds") {
+        targetScenario === "s1" ? setDraftBondsS1(value) : setDraftBondsS2(value);
+      } else {
+        targetScenario === "s1" ? setDraftMMFS1(value) : setDraftMMFS2(value);
+      }
+    };
+
+    applyToScenario(scenario);
+    if (applyToBothScenarios) {
+      applyToScenario(scenario === "s1" ? "s2" : "s1");
+    }
+  };
 
   const applyChanges = () => {
     onApply({
-      portfolio,
-      crashYear,
-
-      equity: draftEquity,
-      bonds: draftBonds,
-      mmf: draftMMF,
-
-      equityAllocS1: allocEquityS1,
-      bondAllocS1: allocBondsS1,
-      mmfAllocS1: allocMMFS1,
-      equityAllocS2: allocEquityS2,
-      bondAllocS2: allocBondsS2,
-      mmfAllocS2: allocMMFS2,
-      equityAllocPostCrash: allocEquityPostCrash,
-      bondAllocPostCrash: allocBondsPostCrash,
-      mmfAllocPostCrash: allocMMFPostCrash
+      equityS1: draftEquityS1,
+      bondsS1: draftBondsS1,
+      mmfS1: draftMMFS1,
+      equityS2: draftEquityS2,
+      bondsS2: draftBondsS2,
+      mmfS2: draftMMFS2
     });
   };
 
-  const sumS1 = allocEquityS1 + allocBondsS1 + allocMMFS1;
-  const sumS2 = allocEquityS2 + allocBondsS2 + allocMMFS2;
-  const sumPost = allocEquityPostCrash + allocBondsPostCrash + allocMMFPostCrash;
-
-  const isS1Invalid = sumS1 !== 100;
-  const isS2Invalid = sumS2 !== 100;
-  const isPostInvalid = sumPost !== 100;
-
   return (
     <div className="panel-container">
-      <h2 className="control-title">Growth Rates & Allocations</h2>
+      <h2 className="control-title">Growth Rates</h2>
 
-      {/* HEADER ROW */}
-      <div className="control-row" style={{ fontWeight: 600, marginBottom: 10, fontSize: "12px" }}>
-        <label style={{ width: 80, textAlign: "left" }}>Asset</label>
-        <label style={{ width: 70, textAlign: "center" }}>Growth (%)</label>
-        <label style={{ width: 80, textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: "2px" }}>
-          Alloc. S1
-          {isS1Invalid && (
-            <span
-              title={`Scenario 1 allocations before crash sum to ${sumS1}%. They must sum to 100%.`}
-              style={{ color: "#ef4444", cursor: "help", fontSize: "14px" }}
-            >
-              ⚠️
-            </span>
-          )}
-        </label>
-        <label style={{ width: 80, textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: "2px" }}>
-          Alloc. S2
-          {isS2Invalid && (
-            <span
-              title={`Scenario 2 allocations before crash sum to ${sumS2}%. They must sum to 100%.`}
-              style={{ color: "#ef4444", cursor: "help", fontSize: "14px" }}
-            >
-              ⚠️
-            </span>
-          )}
-        </label>
-        <label style={{ width: 80, textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: "2px" }}>
-          Alloc. After
-          {isPostInvalid && (
-            <span
-              title={`Allocations after crash sum to ${sumPost}%. They must sum to 100%.`}
-              style={{ color: "#ef4444", cursor: "help", fontSize: "14px" }}
-            >
-              ⚠️
-            </span>
-          )}
-        </label>
-      </div>
-
-      {/* EQUITY */}
-      <div className="control-row">
-        <label style={{ width: 80, fontSize: "13px" }}>Equities</label>
-
-        <input
-          type="number"
-          step="0.1"
-          value={draftEquity}
-          onChange={(e) => setDraftEquity(Number(e.target.value))}
-          style={{ width: 70 }}
-        />
-
-        <input
-          type="number"
-          step="1"
-          value={allocEquityS1}
-          onChange={(e) => setAllocEquityS1(Number(e.target.value))}
-          style={{ width: 80, backgroundColor: isS1Invalid ? "#fee2e2" : undefined }}
-        />
-
-        <input
-          type="number"
-          step="1"
-          value={allocEquityS2}
-          onChange={(e) => setAllocEquityS2(Number(e.target.value))}
-          style={{ width: 80, backgroundColor: isS2Invalid ? "#fee2e2" : undefined }}
-        />
-
-        <input
-          type="number"
-          step="1"
-          value={allocEquityPostCrash}
-          onChange={(e) => setAllocEquityPostCrash(Number(e.target.value))}
-          style={{ width: 80, backgroundColor: isPostInvalid ? "#fee2e2" : undefined }}
-        />
-      </div>
-
-      {/* BONDS */}
-      <div className="control-row">
-        <label style={{ width: 80, fontSize: "13px" }}>Bonds</label>
-
-        <input
-          type="number"
-          step="0.1"
-          value={draftBonds}
-          onChange={(e) => setDraftBonds(Number(e.target.value))}
-          style={{ width: 70 }}
-        />
-
-        <input
-          type="number"
-          step="1"
-          value={allocBondsS1}
-          onChange={(e) => setAllocBondsS1(Number(e.target.value))}
-          style={{ width: 80, backgroundColor: isS1Invalid ? "#fee2e2" : undefined }}
-        />
-
-        <input
-          type="number"
-          step="1"
-          value={allocBondsS2}
-          onChange={(e) => setAllocBondsS2(Number(e.target.value))}
-          style={{ width: 80, backgroundColor: isS2Invalid ? "#fee2e2" : undefined }}
-        />
-
-        <input
-          type="number"
-          step="1"
-          value={allocBondsPostCrash}
-          onChange={(e) => setAllocBondsPostCrash(Number(e.target.value))}
-          style={{ width: 80, backgroundColor: isPostInvalid ? "#fee2e2" : undefined }}
-        />
-      </div>
-
-      {/* MMF */}
-      <div className="control-row">
-        <label style={{ width: 80, fontSize: "13px" }}>MMF</label>
-
-        <input
-          type="number"
-          step="0.1"
-          value={draftMMF}
-          onChange={(e) => setDraftMMF(Number(e.target.value))}
-          style={{ width: 70 }}
-        />
-
-        <input
-          type="number"
-          step="1"
-          value={allocMMFS1}
-          onChange={(e) => setAllocMMFS1(Number(e.target.value))}
-          style={{ width: 80, backgroundColor: isS1Invalid ? "#fee2e2" : undefined }}
-        />
-
-        <input
-          type="number"
-          step="1"
-          value={allocMMFS2}
-          onChange={(e) => setAllocMMFS2(Number(e.target.value))}
-          style={{ width: 80, backgroundColor: isS2Invalid ? "#fee2e2" : undefined }}
-        />
-
-        <input
-          type="number"
-          step="1"
-          value={allocMMFPostCrash}
-          onChange={(e) => setAllocMMFPostCrash(Number(e.target.value))}
-          style={{ width: 80, backgroundColor: isPostInvalid ? "#fee2e2" : undefined }}
-        />
+      <div style={{ overflowX: "auto", marginBottom: "10px" }}>
+        <table className="growth-table">
+          <thead>
+            <tr>
+              <th>Asset</th>
+              <th>Scenario 1</th>
+              <th>Scenario 2</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Equities</td>
+              <td>
+                <input
+                  className="compact-percent-input"
+                  type="number"
+                  step="0.1"
+                  value={draftEquityS1}
+                  onChange={(e) => handleRateChange("s1", "equity", e.target.value)}
+                />
+              </td>
+              <td>
+                <input
+                  className="compact-percent-input"
+                  type="number"
+                  step="0.1"
+                  value={draftEquityS2}
+                  onChange={(e) => handleRateChange("s2", "equity", e.target.value)}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>Bonds</td>
+              <td>
+                <input
+                  className="compact-percent-input"
+                  type="number"
+                  step="0.1"
+                  value={draftBondsS1}
+                  onChange={(e) => handleRateChange("s1", "bonds", e.target.value)}
+                />
+              </td>
+              <td>
+                <input
+                  className="compact-percent-input"
+                  type="number"
+                  step="0.1"
+                  value={draftBondsS2}
+                  onChange={(e) => handleRateChange("s2", "bonds", e.target.value)}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>MMF</td>
+              <td>
+                <input
+                  className="compact-percent-input"
+                  type="number"
+                  step="0.1"
+                  value={draftMMFS1}
+                  onChange={(e) => handleRateChange("s1", "mmf", e.target.value)}
+                />
+              </td>
+              <td>
+                <input
+                  className="compact-percent-input"
+                  type="number"
+                  step="0.1"
+                  value={draftMMFS2}
+                  onChange={(e) => handleRateChange("s2", "mmf", e.target.value)}
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       {/* APPLY BUTTON */}

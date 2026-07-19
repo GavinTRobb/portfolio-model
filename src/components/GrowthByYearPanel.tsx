@@ -3,8 +3,15 @@ import { useEffect, useState } from "react";
 interface Props {
   startYear: number;
   period: number;
+  applyToBothScenarios: boolean;
+  selectedScenario: "s1" | "s2";
+  onApplyToBothScenariosChange: (checked: boolean) => void;
+  onSelectedScenarioChange: (scenario: "s1" | "s2") => void;
   crashYear?: number;
-  crashPercent?: number;
+  crashPercent: number;
+  onCrashPercentChange: (value: number) => void;
+  interestRateChange: number;
+  onInterestRateChange: (value: number) => void;
 
   equityRate: number;
   bondRate: number;
@@ -25,8 +32,15 @@ export interface GrowthRow {
 export default function GrowthByYearPanel({
   startYear,
   period,
+  applyToBothScenarios,
+  selectedScenario,
+  onApplyToBothScenariosChange,
+  onSelectedScenarioChange,
   crashYear,
   crashPercent,
+  onCrashPercentChange,
+  interestRateChange,
+  onInterestRateChange,
   equityRate,
   bondRate,
   mmfRate,
@@ -71,14 +85,61 @@ export default function GrowthByYearPanel({
     <div className="panel-container">
       <h2 className="control-title">Growth by Year</h2>
 
-      <div className="bottom-align" style={{ marginBottom: "10px" }}>
+      <div className="control-row" style={{ marginBottom: "8px" }}>
+        <label style={{ width: 140 }}>Crash %</label>
+        <input
+          className="compact-percent-input"
+          type="number"
+          step="1"
+          value={crashPercent}
+          onChange={(e) => onCrashPercentChange(Number(e.target.value))}
+          style={{ width: 110, maxWidth: 110 }}
+        />
+        <span className="percent" style={{ marginRight: 16 }}>%</span>
+
+        <label style={{ width: 140 }}>Interest Rate Change</label>
+        <input
+          className="compact-percent-input"
+          type="number"
+          step="0.1"
+          value={interestRateChange}
+          onChange={(e) => onInterestRateChange(Number(e.target.value))}
+          style={{ width: 110, maxWidth: 110 }}
+        />
+        <span className="percent">%</span>
+      </div>
+
+      <div className="control-row" style={{ marginBottom: "10px" }}>
+        <label style={{ width: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+          <input
+            type="checkbox"
+            checked={applyToBothScenarios}
+            onChange={(e) => onApplyToBothScenariosChange(e.target.checked)}
+            style={{ width: 16, height: 16 }}
+          />
+          Apply to both scenarios
+        </label>
+
+        <label style={{ width: "auto" }}>Scenario</label>
+        <select
+          value={selectedScenario}
+          onChange={(e) => onSelectedScenarioChange(e.target.value as "s1" | "s2")}
+          disabled={applyToBothScenarios}
+          style={{ width: 130, maxWidth: 130 }}
+        >
+          <option value="s1">Scenario 1</option>
+          <option value="s2">Scenario 2</option>
+        </select>
+      </div>
+
+      <div style={{ marginBottom: "10px" }}>
         <button className="apply-button" onClick={handleApplyGrowthAdjustments}>
           Apply Growth Adjustments
         </button>
       </div>
 
       {/* TABLE */}
-      <div style={{ overflowY: "auto", flex: 1 }}>
+      <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
         <table className="growth-table">
           <thead>
             <tr>
@@ -95,6 +156,7 @@ export default function GrowthByYearPanel({
 
                 <td>
                   <input
+                    className="compact-percent-input"
                     type="number"
                     value={row.equity}
                     onChange={(e) =>
@@ -105,6 +167,7 @@ export default function GrowthByYearPanel({
 
                 <td>
                   <input
+                    className="compact-percent-input"
                     type="number"
                     value={row.bonds}
                     onChange={(e) =>
@@ -115,6 +178,7 @@ export default function GrowthByYearPanel({
 
                 <td>
                   <input
+                    className="compact-percent-input"
                     type="number"
                     value={row.mmf}
                     onChange={(e) =>

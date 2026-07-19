@@ -24,10 +24,26 @@ interface Props {
     mmfEndValue?: number;
   }[];
   age: number;
+  startYear: number;
+  period: number;
+  crashYear: number;
+  onCrashYearChange: (year: number) => void;
 }
 
-export default function NavChartPanel({ title = "NAV Chart", navRows, age }: Props) {
+export default function NavChartPanel({
+  title = "NAV Chart",
+  navRows,
+  age,
+  startYear,
+  period,
+  crashYear,
+  onCrashYearChange
+}: Props) {
   const [scale, setScale] = useState<"actual" | "k" | "m">("m");
+
+  const minYear = startYear;
+  const maxYear = startYear + period - 1;
+  const sliderValue = Math.min(Math.max(crashYear, minYear), maxYear);
 
   const scaleValue = (v: number) => {
     if (scale === "k") return v / 1_000;
@@ -73,6 +89,20 @@ export default function NavChartPanel({ title = "NAV Chart", navRows, age }: Pro
         </select>
       </div>
 
+      <div className="control-row" style={{ marginBottom: "8px", gap: 8 }}>
+        <label style={{ width: "auto", marginRight: 4 }}>Crash Year: {crashYear}</label>
+        <input
+          type="range"
+          min={minYear}
+          max={maxYear}
+          step={1}
+          value={sliderValue}
+          onChange={(e) => onCrashYearChange(Number(e.target.value))}
+          className="button-slider"
+          style={{ height: 22 }}
+        />
+      </div>
+
       <div
         style={{
           flex: 1,
@@ -80,7 +110,7 @@ export default function NavChartPanel({ title = "NAV Chart", navRows, age }: Pro
           width: "100%",
           height: "100%",
           border: "1px solid #4b5563",
-          borderRadius: 8,
+          borderRadius: 0,
           padding: 2,
           boxSizing: "border-box"
         }}
