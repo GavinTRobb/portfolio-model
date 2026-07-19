@@ -4,8 +4,11 @@ interface Props {
   drawdownYear: number;
   onDrawdownYearChange: (v: number) => void;
 
-  drawdownAmount: number;
-  onDrawdownAmountChange: (v: number) => void;
+  drawdownAmountS1: number;
+  onDrawdownAmountS1Change: (v: number) => void;
+
+  drawdownAmountS2: number;
+  onDrawdownAmountS2Change: (v: number) => void;
 
   drawdownStartYear: number;
   onDrawdownStartYearChange: (v: number) => void;
@@ -17,8 +20,11 @@ export default function DrawdownPanel({
   drawdownYear,
   onDrawdownYearChange,
 
-  drawdownAmount,
-  onDrawdownAmountChange,
+  drawdownAmountS1,
+  onDrawdownAmountS1Change,
+
+  drawdownAmountS2,
+  onDrawdownAmountS2Change,
 
   drawdownStartYear,
   onDrawdownStartYearChange,
@@ -27,12 +33,6 @@ export default function DrawdownPanel({
 }: Props) {
   const formatNumber = (value: number) =>
     value.toLocaleString("en-US", { maximumFractionDigits: 0 });
-
-  const handleDrawdownAmountInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/,/g, "");
-    const num = Number(raw);
-    if (!isNaN(num)) onDrawdownAmountChange(num);
-  };
 
   return (
     <div className="panel-container">
@@ -57,11 +57,28 @@ export default function DrawdownPanel({
       </div>
 
       <div className="control-row">
-        <label>Drawdown Amount</label>
+        <label>Drawdown Amount S1</label>
         <input
           type="text"
-          value={formatNumber(drawdownAmount)}
-          onChange={handleDrawdownAmountInput}
+          value={formatNumber(drawdownAmountS1)}
+          onChange={(e) => {
+            const raw = e.target.value.replace(/,/g, "");
+            const num = Number(raw);
+            if (!isNaN(num)) onDrawdownAmountS1Change(num);
+          }}
+        />
+      </div>
+
+      <div className="control-row">
+        <label>Drawdown Amount S2</label>
+        <input
+          type="text"
+          value={formatNumber(drawdownAmountS2)}
+          onChange={(e) => {
+            const raw = e.target.value.replace(/,/g, "");
+            const num = Number(raw);
+            if (!isNaN(num)) onDrawdownAmountS2Change(num);
+          }}
         />
       </div>
 
