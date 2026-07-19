@@ -61,50 +61,61 @@ export default function CrashYearPanel({
       {/* TITLE */}
       <h2 className="control-title">Portfolio</h2>
 
-      <div className="control-row">
-        <label style={{ width: 100 }}>Portfolio Value</label>
+      {/* PORTFOLIO VALUE */}
+      <div className="control-row" style={{ marginBottom: "8px" }}>
+        <label style={{ width: 140 }}>Portfolio Value</label>
         <input
           type="text"
           value={formatNumber(portfolio)}
           onChange={handlePortfolioInput}
-          style={{ width: 100, maxWidth: 100, marginRight: 12 }}
-        />
-
-        <label style={{ width: 35 }}>Age</label>
-        <input
-          type="number"
-          value={age}
-          onChange={(e) => onAgeChange(Number(e.target.value))}
-          style={{ width: 50, maxWidth: 50, marginRight: 12 }}
-        />
-
-        <label style={{ width: 45 }}>Period</label>
-        <input
-          type="number"
-          value={period}
-          onChange={(e) => onPeriodChange(Number(e.target.value))}
-          style={{ width: 50, maxWidth: 50 }}
+          style={{ width: 110, maxWidth: 110 }}
         />
       </div>
 
-      <div className="control-row">
-        <label style={{ width: 60 }}>Crash %</label>
+      {/* CRASH % */}
+      <div className="control-row" style={{ marginBottom: "8px" }}>
+        <label style={{ width: 140 }}>Crash %</label>
         <input
           type="number"
           step="1"
           value={crashPercent}
           onChange={(e) => onCrashPercentChange(Number(e.target.value))}
-          style={{ width: 60, maxWidth: 60 }}
+          style={{ width: 110, maxWidth: 110 }}
         />
-        <span className="percent" style={{ marginRight: 16 }}>%</span>
+        <span className="percent">%</span>
+      </div>
 
-        <label style={{ width: 130 }}>Interest Rate Change</label>
+      {/* AGE */}
+      <div className="control-row" style={{ marginBottom: "8px" }}>
+        <label style={{ width: 140 }}>Age</label>
+        <input
+          type="number"
+          value={age}
+          onChange={(e) => onAgeChange(Number(e.target.value))}
+          style={{ width: 110, maxWidth: 110 }}
+        />
+      </div>
+
+      {/* PERIOD */}
+      <div className="control-row" style={{ marginBottom: "8px" }}>
+        <label style={{ width: 140 }}>Period</label>
+        <input
+          type="number"
+          value={period}
+          onChange={(e) => onPeriodChange(Number(e.target.value))}
+          style={{ width: 110, maxWidth: 110 }}
+        />
+      </div>
+
+      {/* INTEREST RATE CHANGE */}
+      <div className="control-row" style={{ marginBottom: "12px" }}>
+        <label style={{ width: 140 }}>Interest Rate Change</label>
         <input
           type="number"
           step="0.1"
           value={interestRateChange}
           onChange={(e) => onInterestRateChange(Number(e.target.value))}
-          style={{ width: 60, maxWidth: 60 }}
+          style={{ width: 110, maxWidth: 110 }}
         />
         <span className="percent">%</span>
       </div>
