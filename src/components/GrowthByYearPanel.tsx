@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 
 interface Props {
+  startYear: number;
   period: number;
+  crashYear?: number;
+  crashPercent?: number;
 
   equityRate: number;
   bondRate: number;
@@ -20,7 +23,10 @@ export interface GrowthRow {
 }
 
 export default function GrowthByYearPanel({
+  startYear,
   period,
+  crashYear,
+  crashPercent,
   equityRate,
   bondRate,
   mmfRate,
@@ -35,15 +41,17 @@ export default function GrowthByYearPanel({
   useEffect(() => {
     const newRows: GrowthRow[] = [];
     for (let i = 0; i < period; i++) {
+      const year = startYear + i;
+      const defaultEquity = year === crashYear ? -Math.abs(crashPercent ?? 0) : equityRate;
       newRows.push({
-        year: 2026 + i,
-        equity: equityRate,
+        year,
+        equity: defaultEquity,
         bonds: bondRate,
         mmf: mmfRate
       });
     }
     setRows(newRows);
-  }, [equityRate, bondRate, mmfRate, period, resetTrigger]);
+  }, [equityRate, bondRate, mmfRate, period, resetTrigger, startYear, crashYear, crashPercent]);
 
   const updateCell = (index: number, field: keyof GrowthRow, value: number) => {
     const updated = [...rows];
@@ -64,9 +72,6 @@ export default function GrowthByYearPanel({
       <h2 className="control-title">Growth by Year</h2>
 
       <div className="bottom-align" style={{ marginBottom: "10px" }}>
-        <button className="apply-button" onClick={onApplyGrowthRates}>
-          Apply Growth Rates
-        </button>
         <button className="apply-button" onClick={handleApplyGrowthAdjustments}>
           Apply Growth Adjustments
         </button>

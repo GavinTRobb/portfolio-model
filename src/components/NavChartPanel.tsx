@@ -1,24 +1,32 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  CartesianGrid
+  CartesianGrid,
+  Legend
 } from "recharts";
 
 interface Props {
+  title?: string;
   navRows: {
     year: number;
     end?: number;
     endValue?: number;
+    growthRate?: number;
+    crashApplied?: boolean;
+    drawdownApplied?: boolean;
+    eqEndValue?: number;
+    bdEndValue?: number;
+    mmfEndValue?: number;
   }[];
   age: number;
 }
 
-export default function NavChartPanel({ navRows, age }: Props) {
+export default function NavChartPanel({ title = "NAV Chart", navRows, age }: Props) {
   const [scale, setScale] = useState<"actual" | "k" | "m">("m");
 
   const scaleValue = (v: number) => {
@@ -33,16 +41,26 @@ export default function NavChartPanel({ navRows, age }: Props) {
     return v.toLocaleString();
   };
 
-  const chartData = navRows.map((r) => ({
-    year: r.year,
-    end: scaleValue(r.endValue ?? r.end ?? 0)
-  }));
+  const chartData = useMemo(() => {
+    return navRows.map((row) => {
+      const endValue = row.endValue ?? row.end ?? 0;
+      const eqValue = row.eqEndValue ?? 0;
+      const bdValue = row.bdEndValue ?? 0;
+      const mmfValue = row.mmfEndValue ?? 0;
+      return {
+        year: row.year,
+        end: scaleValue(Math.max(0, endValue)),
+        eq: scaleValue(Math.max(0, eqValue)),
+        bd: scaleValue(Math.max(0, bdValue)),
+        mmf: scaleValue(Math.max(0, mmfValue))
+      };
+    });
+  }, [navRows, scale]);
 
   return (
     <div className="panel-container">
-      <h2 className="control-title">NAV Chart</h2>
+      <h2 className="control-title">{title}</h2>
 
-      {/* Dropdown */}
       <div style={{ marginBottom: "8px" }}>
         <select
           value={scale}
@@ -68,37 +86,19 @@ export default function NavChartPanel({ navRows, age }: Props) {
         }}
       >
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 24, right: 8, left: 2, bottom: 18 }}>
+          <BarChart data={chartData} margin={{ top: 24, right: 8, left: 2, bottom: 18 }}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="year"
-              axisLine={false}
-              tickLine={false}
-              tickMargin={4}
-              padding={{ left: 4, right: 4 }}
-              orientation="top"
-              tickFormatter={(value) => `${age + (Number(value) - 2026)}`}
-            />
-            <XAxis
-              dataKey="year"
-              axisLine={false}
-              tickLine={false}
-              tickMargin={4}
-              padding={{ left: 4, right: 4 }}
-            />
+            <XAxis dataKey="year" axisLine={false} tickLine={false} tickMargin={4} />
             <YAxis tickFormatter={formatTick} />
             <Tooltip
-              formatter={(v: number) => formatTick(v)}
+              formatter={(value: number) => formatTick(value)}
               labelFormatter={(label) => `Year ${label}`}
             />
-            <Line
-              type="monotone"
-              dataKey="end"
-              stroke="#4f46e5"
-              strokeWidth={2}
-              dot={false}
-            />
-          </LineChart>
+            <Legend />
+            <Bar dataKey="eq" stackId="a" fill="#4f46e5" />
+            <Bar dataKey="bd" stackId="a" fill="#10b981" />
+            <Bar dataKey="mmf" stackId="a" fill="#f59e0b" />
+          </BarChart>
         </ResponsiveContainer>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 interface Props {
+  title?: string;
   navRows: {
     year: number;
     endValue: number;
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export default function NavPerYearPanel({
+  title = "NAV per Year",
   navRows,
   growthTable,
   initialPortfolioValue,
@@ -55,13 +57,7 @@ export default function NavPerYearPanel({
   );
 
   useEffect(() => {
-    setDraftDrawdowns((prev) => {
-      if (prev.length === navRows.length) {
-        return prev;
-      }
-
-      return navRows.map((_, index) => formatInputValue(getDefaultDrawdownValue(index)));
-    });
+    setDraftDrawdowns(navRows.map((_, index) => formatInputValue(getDefaultDrawdownValue(index))));
   }, [navRows.length, drawdownStartYear, drawdownYear, drawdownAmount]);
 
   const parseDraftValue = (rawValue: string | undefined, fallback: number) => {
@@ -85,6 +81,9 @@ export default function NavPerYearPanel({
       drawdownValue: number;
       drawdownPct: number;
       endValue: number;
+      eqEndValue: number;
+      bdEndValue: number;
+      mmfEndValue: number;
     }>
     >((acc, row, idx) => {
       const startValue = idx === 0 ? initialPortfolioValue : acc[idx - 1].endValue;
@@ -103,9 +102,16 @@ export default function NavPerYearPanel({
       const interimValue = startValue + eqGrowth + bdGrowth + mmfGrowth;
       const defaultDrawdownValue = getDefaultDrawdownValue(idx);
       const drawdownValue = parseDraftValue(draftDrawdowns[idx], defaultDrawdownValue);
+      const drawdownMagnitude = Math.abs(drawdownValue);
       const drawdownPct =
         interimValue !== 0 ? (drawdownValue / interimValue) * 100 : 0;
       const endValue = interimValue + drawdownValue;
+      const eqStartValue = startValue * ((growthRow?.equityAlloc ?? 0) / 100);
+      const bdStartValue = startValue * ((growthRow?.bondAlloc ?? 0) / 100);
+      const mmfStartValue = startValue * ((growthRow?.mmfAlloc ?? 0) / 100);
+      const eqEndValue = eqStartValue + eqGrowth - drawdownMagnitude * ((growthRow?.equityAlloc ?? 0) / 100);
+      const bdEndValue = bdStartValue + bdGrowth - drawdownMagnitude * ((growthRow?.bondAlloc ?? 0) / 100);
+      const mmfEndValue = mmfStartValue + mmfGrowth - drawdownMagnitude * ((growthRow?.mmfAlloc ?? 0) / 100);
 
       acc.push({
         startValue,
@@ -115,7 +121,10 @@ export default function NavPerYearPanel({
         interimValue,
         drawdownValue,
         drawdownPct,
-        endValue
+        endValue,
+        eqEndValue,
+        bdEndValue,
+        mmfEndValue
       });
 
       return acc;
@@ -130,6 +139,9 @@ export default function NavPerYearPanel({
   const drawdownValues = rowResults.map((row) => row.drawdownValue);
   const drawdownPctValues = rowResults.map((row) => row.drawdownPct);
   const endValues = rowResults.map((row) => row.endValue);
+  const eqEndValues = rowResults.map((row) => row.eqEndValue);
+  const bdEndValues = rowResults.map((row) => row.bdEndValue);
+  const mmfEndValues = rowResults.map((row) => row.mmfEndValue);
 
   const handleDrawdownInput = (index: number, rawValue: string) => {
     setDraftDrawdowns((prev) => {
@@ -151,7 +163,7 @@ export default function NavPerYearPanel({
 
   return (
     <div className="panel-container">
-      <h2 className="control-title">NAV per Year</h2>
+      <h2 className="control-title">{title}</h2>
 
       <div className="bottom-align" style={{ marginBottom: "10px" }}>
         <button className="apply-button" onClick={handleApplyDrawdownChanges}>
@@ -171,6 +183,9 @@ export default function NavPerYearPanel({
               <th>Interim Value</th>
               <th>Drawdown</th>
               <th>Drawdown %</th>
+              <th>EQ End Value</th>
+              <th>BD End Value</th>
+              <th>MMF End Value</th>
               <th>End Value</th>
             </tr>
           </thead>
@@ -193,6 +208,9 @@ export default function NavPerYearPanel({
                   />
                 </td>
                 <td>{fmtPct(drawdownPctValues[idx])}%</td>
+                <td>{fmt(eqEndValues[idx])}</td>
+                <td>{fmt(bdEndValues[idx])}</td>
+                <td>{fmt(mmfEndValues[idx])}</td>
                 <td>{fmt(endValues[idx])}</td>
               </tr>
             ))}

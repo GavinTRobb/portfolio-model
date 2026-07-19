@@ -38,4 +38,32 @@ describe('NavPerYearPanel drawdown editing', () => {
 
     expect(onApplyDrawdownChanges).toHaveBeenCalledWith([-250000]);
   });
+
+  it('computes asset end values from allocation-based growth and drawdown', () => {
+    const { container } = render(
+      <NavPerYearPanel
+        navRows={[{ year: 2026, endValue: 1000000 }]}
+        growthTable={[
+          {
+            year: 2026,
+            equityRate: 10,
+            bondRate: 5,
+            mmfRate: 2,
+            equityAlloc: 50,
+            bondAlloc: 30,
+            mmfAlloc: 20
+          }
+        ]}
+        initialPortfolioValue={1000000}
+        drawdownStartYear={2026}
+        drawdownYear={2026}
+        drawdownAmount={100000}
+      />
+    );
+
+    const rowCells = container.querySelector('tbody tr')?.querySelectorAll('td');
+    expect(rowCells?.[8]?.textContent).toBe('500,000');
+    expect(rowCells?.[9]?.textContent).toBe('285,000');
+    expect(rowCells?.[10]?.textContent).toBe('184,000');
+  });
 });

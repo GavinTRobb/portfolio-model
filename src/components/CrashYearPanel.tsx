@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 interface Props {
+  startYear: number;
   portfolio: number;
   onPortfolioChange: (value: number) => void;
 
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export default function CrashYearPanel({
+  startYear,
   portfolio,
   onPortfolioChange,
 
@@ -40,10 +42,12 @@ export default function CrashYearPanel({
   onPeriodChange
 }: Props) {
 
-  const CURRENT_YEAR = 2026;
-
   const formatNumber = (v: number) =>
     v.toLocaleString("en-US", { maximumFractionDigits: 0 });
+
+  const minYear = startYear;
+  const maxYear = startYear + period - 1;
+  const sliderValue = Math.min(Math.max(crashYear, minYear), maxYear);
 
   const handlePortfolioInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/,/g, "");
@@ -58,68 +62,63 @@ export default function CrashYearPanel({
       <h2 className="control-title">Portfolio</h2>
 
       <div className="control-row">
-        <label>Portfolio Value</label>
+        <label style={{ width: 100 }}>Portfolio Value</label>
         <input
           type="text"
           value={formatNumber(portfolio)}
           onChange={handlePortfolioInput}
-          style={{ width: 120, maxWidth: 120 }}
+          style={{ width: 100, maxWidth: 100, marginRight: 12 }}
         />
-        <label style={{ width: 60, marginLeft: 8 }}>Age</label>
+
+        <label style={{ width: 35 }}>Age</label>
         <input
           type="number"
           value={age}
           onChange={(e) => onAgeChange(Number(e.target.value))}
-          style={{ width: 70, maxWidth: 70 }}
+          style={{ width: 50, maxWidth: 50, marginRight: 12 }}
         />
-      </div>
 
-      <div className="control-row">
-        <label>Period</label>
+        <label style={{ width: 45 }}>Period</label>
         <input
           type="number"
           value={period}
           onChange={(e) => onPeriodChange(Number(e.target.value))}
-          style={{ width: 90, maxWidth: 90 }}
+          style={{ width: 50, maxWidth: 50 }}
         />
       </div>
 
       <div className="control-row">
-        <label>Crash %</label>
+        <label style={{ width: 60 }}>Crash %</label>
         <input
           type="number"
           step="1"
           value={crashPercent}
           onChange={(e) => onCrashPercentChange(Number(e.target.value))}
-          style={{ width: 70, maxWidth: 70 }}
+          style={{ width: 60, maxWidth: 60 }}
         />
-        <span className="percent">%</span>
-      </div>
+        <span className="percent" style={{ marginRight: 16 }}>%</span>
 
-      <div className="control-row">
-        <label>Interest Rate Change</label>
+        <label style={{ width: 130 }}>Interest Rate Change</label>
         <input
           type="number"
           step="0.1"
           value={interestRateChange}
           onChange={(e) => onInterestRateChange(Number(e.target.value))}
-          style={{ width: 70, maxWidth: 70 }}
+          style={{ width: 60, maxWidth: 60 }}
         />
         <span className="percent">%</span>
       </div>
 
       {/* BOTTOM — SLIDER */}
-      <div className="bottom-align">
-        <div className="slider-label">
-          Crash Year: {crashYear === 0 ? "None" : CURRENT_YEAR + crashYear}
-        </div>
+      <div className="bottom-align" style={{ marginTop: "8px" }}>
+        <div className="slider-label">Crash Year: {crashYear}</div>
 
         <input
           type="range"
-          min={0}
-          max={period}
+          min={minYear}
+          max={maxYear}
           step={1}
-          value={crashYear}
+          value={sliderValue}
           onChange={(e) => onCrashYearChange(Number(e.target.value))}
           className="button-slider"
         />
