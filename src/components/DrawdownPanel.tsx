@@ -51,7 +51,7 @@ export default function DrawdownPanel({
           type="number"
           value={drawdownStartYear}
           onChange={(e) => onDrawdownStartYearChange(Number(e.target.value))}
-          style={{ width: 110 }}
+          style={{ width: 110, maxWidth: 110, flex: "none" }}
         />
       </div>
 
@@ -69,13 +69,13 @@ export default function DrawdownPanel({
           type="number"
           value={drawdownYearS1}
           onChange={(e) => onDrawdownYearS1Change(Number(e.target.value))}
-          style={{ width: 110 }}
+          style={{ width: 110, maxWidth: 110, flex: "none" }}
         />
         <input
           type="number"
           value={drawdownYearS2}
           onChange={(e) => onDrawdownYearS2Change(Number(e.target.value))}
-          style={{ width: 110, marginLeft: "10px" }}
+          style={{ width: 110, maxWidth: 110, flex: "none", marginLeft: "10px" }}
         />
       </div>
 
@@ -90,7 +90,7 @@ export default function DrawdownPanel({
             const num = Number(raw);
             if (!isNaN(num)) onDrawdownAmountS1Change(num);
           }}
-          style={{ width: 110 }}
+          style={{ width: 110, maxWidth: 110, flex: "none" }}
         />
         <input
           type="text"
@@ -100,7 +100,7 @@ export default function DrawdownPanel({
             const num = Number(raw);
             if (!isNaN(num)) onDrawdownAmountS2Change(num);
           }}
-          style={{ width: 110, marginLeft: "10px" }}
+          style={{ width: 110, maxWidth: 110, flex: "none", marginLeft: "10px" }}
         />
       </div>
 
