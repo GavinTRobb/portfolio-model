@@ -1,8 +1,14 @@
 import { useState } from "react";
 
 interface Props {
-  drawdownYear: number;
-  onDrawdownYearChange: (v: number) => void;
+  drawdownStartYear: number;
+  onDrawdownStartYearChange: (v: number) => void;
+
+  drawdownYearS1: number;
+  onDrawdownYearS1Change: (v: number) => void;
+
+  drawdownYearS2: number;
+  onDrawdownYearS2Change: (v: number) => void;
 
   drawdownAmountS1: number;
   onDrawdownAmountS1Change: (v: number) => void;
@@ -10,24 +16,24 @@ interface Props {
   drawdownAmountS2: number;
   onDrawdownAmountS2Change: (v: number) => void;
 
-  drawdownStartYear: number;
-  onDrawdownStartYearChange: (v: number) => void;
-
   onApply: () => void;
 }
 
 export default function DrawdownPanel({
-  drawdownYear,
-  onDrawdownYearChange,
+  drawdownStartYear,
+  onDrawdownStartYearChange,
+
+  drawdownYearS1,
+  onDrawdownYearS1Change,
+
+  drawdownYearS2,
+  onDrawdownYearS2Change,
 
   drawdownAmountS1,
   onDrawdownAmountS1Change,
 
   drawdownAmountS2,
   onDrawdownAmountS2Change,
-
-  drawdownStartYear,
-  onDrawdownStartYearChange,
 
   onApply
 }: Props) {
@@ -38,26 +44,44 @@ export default function DrawdownPanel({
     <div className="panel-container">
       <h2 className="control-title">Drawdown Settings</h2>
 
-      <div className="control-row">
-        <label>Start Year</label>
+      {/* START YEAR (SHARED) */}
+      <div className="control-row" style={{ marginBottom: "12px" }}>
+        <label style={{ width: 140 }}>Start Year</label>
         <input
           type="number"
           value={drawdownStartYear}
           onChange={(e) => onDrawdownStartYearChange(Number(e.target.value))}
+          style={{ width: 100 }}
         />
       </div>
 
-      <div className="control-row">
-        <label>Drawdown Year</label>
+      {/* HEADERS */}
+      <div className="control-row" style={{ fontWeight: 600, marginBottom: "6px" }}>
+        <label style={{ width: 140 }}></label>
+        <div style={{ width: 100, textAlign: "center" }}>Scenario 1</div>
+        <div style={{ width: 100, textAlign: "center", marginLeft: "10px" }}>Scenario 2</div>
+      </div>
+
+      {/* DRAWDOWN YEAR */}
+      <div className="control-row" style={{ marginBottom: "8px" }}>
+        <label style={{ width: 140 }}>Drawdown Year</label>
         <input
           type="number"
-          value={drawdownYear}
-          onChange={(e) => onDrawdownYearChange(Number(e.target.value))}
+          value={drawdownYearS1}
+          onChange={(e) => onDrawdownYearS1Change(Number(e.target.value))}
+          style={{ width: 100 }}
+        />
+        <input
+          type="number"
+          value={drawdownYearS2}
+          onChange={(e) => onDrawdownYearS2Change(Number(e.target.value))}
+          style={{ width: 100, marginLeft: "10px" }}
         />
       </div>
 
-      <div className="control-row">
-        <label>Drawdown Amount S1</label>
+      {/* DRAWDOWN AMOUNT */}
+      <div className="control-row" style={{ marginBottom: "12px" }}>
+        <label style={{ width: 140 }}>Drawdown Amount</label>
         <input
           type="text"
           value={formatNumber(drawdownAmountS1)}
@@ -66,11 +90,8 @@ export default function DrawdownPanel({
             const num = Number(raw);
             if (!isNaN(num)) onDrawdownAmountS1Change(num);
           }}
+          style={{ width: 100 }}
         />
-      </div>
-
-      <div className="control-row">
-        <label>Drawdown Amount S2</label>
         <input
           type="text"
           value={formatNumber(drawdownAmountS2)}
@@ -79,6 +100,7 @@ export default function DrawdownPanel({
             const num = Number(raw);
             if (!isNaN(num)) onDrawdownAmountS2Change(num);
           }}
+          style={{ width: 100, marginLeft: "10px" }}
         />
       </div>
 

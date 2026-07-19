@@ -107,7 +107,8 @@ function App() {
 
   // DRAWDOWN
   const [drawdownStartYear, setDrawdownStartYear] = useState(startYear);
-  const [drawdownYear, setDrawdownYear] = useState(startYear + 1);
+  const [drawdownYearS1, setDrawdownYearS1] = useState(startYear + 1);
+  const [drawdownYearS2, setDrawdownYearS2] = useState(startYear + 1);
   const [drawdownAmountS1, setDrawdownAmountS1] = useState(300000);
   const [drawdownAmountS2, setDrawdownAmountS2] = useState(300000);
   const [drawdownOverridesS1, setDrawdownOverridesS1] = useState<number[]>([]);
@@ -140,7 +141,8 @@ function App() {
   // AUTO-CORRECT RULES
   const correctedCrashYear = Math.max(crashYear, startYear);
   const correctedDrawdownStart = Math.max(drawdownStartYear, startYear);
-  const correctedDrawdownYear = Math.max(drawdownYear, correctedDrawdownStart);
+  const correctedDrawdownYearS1 = Math.max(drawdownYearS1, correctedDrawdownStart);
+  const correctedDrawdownYearS2 = Math.max(drawdownYearS2, correctedDrawdownStart);
 
   // CHATBOT STATE
   const [chatbotModal, setChatbotModal] = useState<{
@@ -158,14 +160,14 @@ function App() {
 
     if (normalizedQ.includes("portfolio value") || normalizedQ.includes("portfolio need to be")) {
       // Question 1: Required Portfolio Value
-      const runCalc = (growthTable: any[], drawdownAmt: number, overrides: number[]) => {
+      const runCalc = (growthTable: any[], drawdownAmt: number, overrides: number[], corrDrawdownYear: number) => {
         const r1 = simulate({
           portfolioValue: 0,
           period,
           startYear,
           growthTable,
           correctedDrawdownStart,
-          correctedDrawdownYear,
+          correctedDrawdownYearS1,
           drawdownAmount: drawdownAmt,
           drawdownOverrides: overrides,
           correctedCrashYear
@@ -179,7 +181,7 @@ function App() {
           startYear,
           growthTable,
           correctedDrawdownStart,
-          correctedDrawdownYear,
+          correctedDrawdownYearS2,
           drawdownAmount: drawdownAmt,
           drawdownOverrides: overrides,
           correctedCrashYear
@@ -192,8 +194,8 @@ function App() {
         return { possible: true, value: Math.max(0, requiredP) };
       };
 
-      const resS1 = runCalc(growthTableS1, drawdownAmountS1, drawdownOverridesS1);
-      const resS2 = runCalc(growthTableS2, drawdownAmountS2, drawdownOverridesS2);
+      const resS1 = runCalc(growthTableS1, drawdownAmountS1, drawdownOverridesS1, correctedDrawdownYearS1);
+      const resS2 = runCalc(growthTableS2, drawdownAmountS2, drawdownOverridesS2, correctedDrawdownYearS2);
 
       const answerS1 = resS1.possible
         ? `To maintain your drawdowns without significant NAV loss, Scenario 1 requires an initial portfolio value of ${resS1.value.toLocaleString("en-US", { maximumFractionDigits: 0 })}.`
@@ -226,6 +228,7 @@ function App() {
 
         const drawdownAmt = isS1 ? drawdownAmountS1 : drawdownAmountS2;
         const overrides = isS1 ? drawdownOverridesS1 : drawdownOverridesS2;
+        const corrDrawdownYear = isS1 ? correctedDrawdownYearS1 : correctedDrawdownYearS2;
 
         allocations.forEach((alloc) => {
           const tempGrowthTable = [];
@@ -257,7 +260,7 @@ function App() {
             startYear,
             growthTable: tempGrowthTable,
             correctedDrawdownStart,
-            correctedDrawdownYear,
+            correctedDrawdownYear: corrDrawdownYear,
             drawdownAmount: drawdownAmt,
             drawdownOverrides: overrides,
             correctedCrashYear
@@ -425,7 +428,8 @@ function App() {
     setCrashPercent(45);
     setInterestRateChange(-2);
     setDrawdownStartYear(startYear);
-    setDrawdownYear(startYear + 1);
+    setDrawdownYearS1(startYear + 1);
+    setDrawdownYearS2(startYear + 1);
     setDrawdownAmountS1(300000);
     setDrawdownAmountS2(300000);
     setDrawdownOverridesS1([]);
@@ -563,7 +567,7 @@ function App() {
       let drawdownApplied = false;
       let drawdownMagnitude = 0;
       let drawdownValue = 0;
-      if (year >= correctedDrawdownYear && year >= correctedDrawdownStart) {
+      if (year >= correctedDrawdownYearS1 && year >= correctedDrawdownStart) {
         const overrideValue = drawdownOverridesS1[i];
         drawdownValue = overrideValue === undefined ? -drawdownAmountS1 : (overrideValue < 0 ? overrideValue : -Math.abs(overrideValue));
         drawdownMagnitude = Math.abs(drawdownValue);
@@ -636,7 +640,7 @@ function App() {
       let drawdownApplied = false;
       let drawdownMagnitude = 0;
       let drawdownValue = 0;
-      if (year >= correctedDrawdownYear && year >= correctedDrawdownStart) {
+      if (year >= correctedDrawdownYearS2 && year >= correctedDrawdownStart) {
         const overrideValue = drawdownOverridesS2[i];
         drawdownValue = overrideValue === undefined ? -drawdownAmountS2 : (overrideValue < 0 ? overrideValue : -Math.abs(overrideValue));
         drawdownMagnitude = Math.abs(drawdownValue);
@@ -798,19 +802,21 @@ function App() {
         <div className="layout-column">
           <div className="dashboard-box">
             <DrawdownPanel
-            drawdownStartYear={correctedDrawdownStart}
-            onDrawdownStartYearChange={setDrawdownStartYear}
-            drawdownYear={correctedDrawdownYear}
-            onDrawdownYearChange={setDrawdownYear}
-            drawdownAmountS1={drawdownAmountS1}
-            onDrawdownAmountS1Change={setDrawdownAmountS1}
-            drawdownAmountS2={drawdownAmountS2}
-            onDrawdownAmountS2Change={setDrawdownAmountS2}
-            onApply={() => {
-              setDrawdownOverridesS1([]);
-              setDrawdownOverridesS2([]);
-            }}
-          />
+              drawdownStartYear={correctedDrawdownStart}
+              onDrawdownStartYearChange={setDrawdownStartYear}
+              drawdownYearS1={correctedDrawdownYearS1}
+              onDrawdownYearS1Change={setDrawdownYearS1}
+              drawdownYearS2={correctedDrawdownYearS2}
+              onDrawdownYearS2Change={setDrawdownYearS2}
+              drawdownAmountS1={drawdownAmountS1}
+              onDrawdownAmountS1Change={setDrawdownAmountS1}
+              drawdownAmountS2={drawdownAmountS2}
+              onDrawdownAmountS2Change={setDrawdownAmountS2}
+              onApply={() => {
+                setDrawdownOverridesS1([]);
+                setDrawdownOverridesS2([]);
+              }}
+            />
           </div>
           <div className="dashboard-box" style={{ flex: 1 }}>
             <NavPerYearPanel
@@ -819,7 +825,7 @@ function App() {
               growthTable={growthTableS1}
               initialPortfolioValue={portfolioValue}
               drawdownStartYear={correctedDrawdownStart}
-              drawdownYear={correctedDrawdownYear}
+              drawdownYear={correctedDrawdownYearS1}
               drawdownAmount={drawdownAmountS1}
               onApplyDrawdownChanges={setDrawdownOverridesS1}
             />
@@ -831,7 +837,7 @@ function App() {
               growthTable={growthTableS2}
               initialPortfolioValue={portfolioValue}
               drawdownStartYear={correctedDrawdownStart}
-              drawdownYear={correctedDrawdownYear}
+              drawdownYear={correctedDrawdownYearS2}
               drawdownAmount={drawdownAmountS2}
               onApplyDrawdownChanges={setDrawdownOverridesS2}
             />
