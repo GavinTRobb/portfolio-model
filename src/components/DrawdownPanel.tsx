@@ -16,6 +16,12 @@ interface Props {
   drawdownAmountS2: number;
   onDrawdownAmountS2Change: (v: number) => void;
 
+  drawdownInflationS1: number;
+  onDrawdownInflationS1Change: (v: number) => void;
+
+  drawdownInflationS2: number;
+  onDrawdownInflationS2Change: (v: number) => void;
+
   onApply: () => void;
 }
 
@@ -34,6 +40,12 @@ export default function DrawdownPanel({
 
   drawdownAmountS2,
   onDrawdownAmountS2Change,
+
+  drawdownInflationS1,
+  onDrawdownInflationS1Change,
+
+  drawdownInflationS2,
+  onDrawdownInflationS2Change,
 
   onApply
 }: Props) {
@@ -100,6 +112,25 @@ export default function DrawdownPanel({
             const num = Number(raw);
             if (!isNaN(num)) onDrawdownAmountS2Change(num);
           }}
+          style={{ width: 110, maxWidth: 110, flex: "none", marginLeft: "10px" }}
+        />
+      </div>
+
+      {/* DRAWDOWN INFLATION */}
+      <div className="control-row" style={{ marginBottom: "12px" }}>
+        <label style={{ width: 140 }}>Inflation %</label>
+        <input
+          type="number"
+          step="0.1"
+          value={drawdownInflationS1}
+          onChange={(e) => onDrawdownInflationS1Change(Number(e.target.value))}
+          style={{ width: 110, maxWidth: 110, flex: "none" }}
+        />
+        <input
+          type="number"
+          step="0.1"
+          value={drawdownInflationS2}
+          onChange={(e) => onDrawdownInflationS2Change(Number(e.target.value))}
           style={{ width: 110, maxWidth: 110, flex: "none", marginLeft: "10px" }}
         />
       </div>

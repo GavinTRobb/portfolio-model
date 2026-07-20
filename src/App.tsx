@@ -29,6 +29,7 @@ function simulate({
   correctedDrawdownStart,
   correctedDrawdownYear,
   drawdownAmount,
+  drawdownInflationRate,
   drawdownOverrides,
   correctedCrashYear
 }: {
@@ -39,6 +40,7 @@ function simulate({
   correctedDrawdownStart: number;
   correctedDrawdownYear: number;
   drawdownAmount: number;
+  drawdownInflationRate: number;
   drawdownOverrides: number[];
   correctedCrashYear: number;
 }) {
@@ -69,20 +71,21 @@ function simulate({
     const interimValue = startValue + eqGrowthValue + bdGrowthValue + mmfGrowthValue;
 
     let drawdownApplied = false;
-    let drawdownMagnitude = 0;
     let drawdownValue = 0;
     if (year >= correctedDrawdownYear && year >= correctedDrawdownStart) {
+      const drawdownYearIndex = Math.max(0, year - correctedDrawdownYear);
+      const inflationMultiplier = Math.pow(1 + drawdownInflationRate / 100, drawdownYearIndex);
+      const escalatedDrawdownAmount = drawdownAmount * inflationMultiplier;
       const overrideValue = drawdownOverrides[i];
-      drawdownValue = overrideValue === undefined ? -drawdownAmount : (overrideValue < 0 ? overrideValue : -Math.abs(overrideValue));
-      drawdownMagnitude = Math.abs(drawdownValue);
+      drawdownValue = overrideValue === undefined ? -escalatedDrawdownAmount : overrideValue;
       drawdownApplied = drawdownValue !== 0;
     }
 
     nav = interimValue + drawdownValue;
 
-    const eqEndValue = eqStartValue + eqGrowthValue - drawdownMagnitude * eqAlloc;
-    const bdEndValue = bdStartValue + bdGrowthValue - drawdownMagnitude * bdAlloc;
-    const mmfEndValue = mmfStartValue + mmfGrowthValue - drawdownMagnitude * mmfAlloc;
+    const eqEndValue = eqStartValue + eqGrowthValue + drawdownValue * eqAlloc;
+    const bdEndValue = bdStartValue + bdGrowthValue + drawdownValue * bdAlloc;
+    const mmfEndValue = mmfStartValue + mmfGrowthValue + drawdownValue * mmfAlloc;
 
     const crashApplied = year === correctedCrashYear;
 
@@ -119,6 +122,8 @@ type ScenarioSnapshot = {
   drawdownYearS2: number;
   drawdownAmountS1: number;
   drawdownAmountS2: number;
+  drawdownInflationS1: number;
+  drawdownInflationS2: number;
   drawdownOverridesS1: number[];
   drawdownOverridesS2: number[];
   equityRateS1: number;
@@ -189,6 +194,8 @@ function App() {
   const [drawdownYearS2, setDrawdownYearS2] = useState(startYear + 1);
   const [drawdownAmountS1, setDrawdownAmountS1] = useState(300000);
   const [drawdownAmountS2, setDrawdownAmountS2] = useState(300000);
+  const [drawdownInflationS1, setDrawdownInflationS1] = useState(3);
+  const [drawdownInflationS2, setDrawdownInflationS2] = useState(3);
   const [drawdownOverridesS1, setDrawdownOverridesS1] = useState<number[]>([]);
   const [drawdownOverridesS2, setDrawdownOverridesS2] = useState<number[]>([]);
 
@@ -534,6 +541,7 @@ function App() {
       const runCalc = (
         growthTable: any[],
         drawdownAmt: number,
+        drawdownInflationRate: number,
         overrides: number[],
         corrDrawdownYear: number,
         scenarioPortfolioValue: number,
@@ -555,6 +563,7 @@ function App() {
             correctedDrawdownStart,
             correctedDrawdownYear: corrDrawdownYear,
             drawdownAmount: drawdownAmt,
+            drawdownInflationRate,
             drawdownOverrides: overrides,
             correctedCrashYear: scenarioCrashYear
           });
@@ -591,8 +600,8 @@ function App() {
         return { possible: true, additionalGrowth: high };
       };
 
-      const resS1 = runCalc(growthTableS1, drawdownAmountS1, drawdownOverridesS1, correctedDrawdownYearS1, portfolioValueS1, correctedCrashYearS1);
-      const resS2 = runCalc(growthTableS2, drawdownAmountS2, drawdownOverridesS2, correctedDrawdownYearS2, portfolioValueS2, correctedCrashYearS2);
+      const resS1 = runCalc(growthTableS1, drawdownAmountS1, drawdownInflationS1, drawdownOverridesS1, correctedDrawdownYearS1, portfolioValueS1, correctedCrashYearS1);
+      const resS2 = runCalc(growthTableS2, drawdownAmountS2, drawdownInflationS2, drawdownOverridesS2, correctedDrawdownYearS2, portfolioValueS2, correctedCrashYearS2);
 
       const answerS1 = resS1.possible
         ? `To maintain NAV in Scenario 1, you need approximately +${(resS1.additionalGrowth as number).toFixed(2)}% annual growth across assets.`
@@ -613,7 +622,7 @@ function App() {
       });
     } else if (intent === "timing") {
       // Question: Drawdown Start Timing To Maintain NAV
-      const runCalc = (growthTable: any[], drawdownAmt: number, overrides: number[], scenarioPortfolioValue: number, scenarioCrashYear: number) => {
+      const runCalc = (growthTable: any[], drawdownAmt: number, drawdownInflationRate: number, overrides: number[], scenarioPortfolioValue: number, scenarioCrashYear: number) => {
         const horizonEndYear = startYear + period - 1;
 
         for (let candidateYear = correctedDrawdownStart; candidateYear <= startYear + period; candidateYear++) {
@@ -625,6 +634,7 @@ function App() {
             correctedDrawdownStart,
             correctedDrawdownYear: candidateYear,
             drawdownAmount: drawdownAmt,
+            drawdownInflationRate,
             drawdownOverrides: overrides,
             correctedCrashYear: scenarioCrashYear
           });
@@ -641,8 +651,8 @@ function App() {
         return { possible: false, year: null };
       };
 
-      const resS1 = runCalc(growthTableS1, drawdownAmountS1, drawdownOverridesS1, portfolioValueS1, correctedCrashYearS1);
-      const resS2 = runCalc(growthTableS2, drawdownAmountS2, drawdownOverridesS2, portfolioValueS2, correctedCrashYearS2);
+      const resS1 = runCalc(growthTableS1, drawdownAmountS1, drawdownInflationS1, drawdownOverridesS1, portfolioValueS1, correctedCrashYearS1);
+      const resS2 = runCalc(growthTableS2, drawdownAmountS2, drawdownInflationS2, drawdownOverridesS2, portfolioValueS2, correctedCrashYearS2);
 
       const answerS1 = resS1.possible
         ? resS1.year !== null
@@ -670,6 +680,7 @@ function App() {
       const runCalc = (
         growthTable: any[],
         drawdownAmt: number,
+        drawdownInflationRate: number,
         overrides: number[],
         corrDrawdownYear: number,
         scenarioCrashYear: number
@@ -682,6 +693,7 @@ function App() {
           correctedDrawdownStart,
           correctedDrawdownYear: corrDrawdownYear,
           drawdownAmount: drawdownAmt,
+          drawdownInflationRate,
           drawdownOverrides: overrides,
           correctedCrashYear: scenarioCrashYear
         });
@@ -696,6 +708,7 @@ function App() {
           correctedDrawdownStart,
           correctedDrawdownYear: corrDrawdownYear,
           drawdownAmount: drawdownAmt,
+          drawdownInflationRate,
           drawdownOverrides: overrides,
           correctedCrashYear: scenarioCrashYear
         });
@@ -707,8 +720,8 @@ function App() {
         return { possible: true, value: Math.max(0, requiredP) };
       };
 
-      const resS1 = runCalc(growthTableS1, drawdownAmountS1, drawdownOverridesS1, correctedDrawdownYearS1, correctedCrashYearS1);
-      const resS2 = runCalc(growthTableS2, drawdownAmountS2, drawdownOverridesS2, correctedDrawdownYearS2, correctedCrashYearS2);
+      const resS1 = runCalc(growthTableS1, drawdownAmountS1, drawdownInflationS1, drawdownOverridesS1, correctedDrawdownYearS1, correctedCrashYearS1);
+      const resS2 = runCalc(growthTableS2, drawdownAmountS2, drawdownInflationS2, drawdownOverridesS2, correctedDrawdownYearS2, correctedCrashYearS2);
 
       const answerS1 = resS1.possible
         ? `To maintain your drawdowns without significant NAV loss, Scenario 1 requires an initial portfolio value of ${resS1.value.toLocaleString("en-US", { maximumFractionDigits: 0 })}.`
@@ -740,6 +753,7 @@ function App() {
         let bestNav = -Infinity;
 
         const drawdownAmt = isS1 ? drawdownAmountS1 : drawdownAmountS2;
+        const drawdownInflationRate = isS1 ? drawdownInflationS1 : drawdownInflationS2;
         const overrides = isS1 ? drawdownOverridesS1 : drawdownOverridesS2;
         const corrDrawdownYear = isS1 ? correctedDrawdownYearS1 : correctedDrawdownYearS2;
         const scenarioPortfolioValue = isS1 ? portfolioValueS1 : portfolioValueS2;
@@ -786,6 +800,7 @@ function App() {
             correctedDrawdownStart,
             correctedDrawdownYear: corrDrawdownYear,
             drawdownAmount: drawdownAmt,
+            drawdownInflationRate,
             drawdownOverrides: overrides,
             correctedCrashYear: scenarioCrashYear
           });
@@ -816,7 +831,7 @@ function App() {
       });
     } else if (intent === "drawdown") {
       // Question 3: Affordable Drawdown
-      const runCalc = (growthTable: any[], corrDrawdownYear: number, scenarioPortfolioValue: number, scenarioCrashYear: number) => {
+      const runCalc = (growthTable: any[], corrDrawdownYear: number, scenarioPortfolioValue: number, scenarioCrashYear: number, drawdownInflationRate: number) => {
         const r1 = simulate({
           portfolioValue: scenarioPortfolioValue,
           period,
@@ -825,6 +840,7 @@ function App() {
           correctedDrawdownStart,
           correctedDrawdownYear: corrDrawdownYear,
           drawdownAmount: 0,
+          drawdownInflationRate,
           drawdownOverrides: Array(period).fill(undefined),
           correctedCrashYear: scenarioCrashYear
         });
@@ -838,6 +854,7 @@ function App() {
           correctedDrawdownStart,
           correctedDrawdownYear: corrDrawdownYear,
           drawdownAmount: 100_000,
+          drawdownInflationRate,
           drawdownOverrides: Array(period).fill(undefined),
           correctedCrashYear: scenarioCrashYear
         });
@@ -849,8 +866,8 @@ function App() {
         return { possible: true, value: Math.max(0, affordableD) };
       };
 
-      const resS1 = runCalc(growthTableS1, correctedDrawdownYearS1, portfolioValueS1, correctedCrashYearS1);
-      const resS2 = runCalc(growthTableS2, correctedDrawdownYearS2, portfolioValueS2, correctedCrashYearS2);
+      const resS1 = runCalc(growthTableS1, correctedDrawdownYearS1, portfolioValueS1, correctedCrashYearS1, drawdownInflationS1);
+      const resS2 = runCalc(growthTableS2, correctedDrawdownYearS2, portfolioValueS2, correctedCrashYearS2, drawdownInflationS2);
 
       const answerS1 = resS1.possible
         ? `In Scenario 1, you can afford an annual drawdown of ${resS1.value.toLocaleString("en-US", { maximumFractionDigits: 0 })} each year without NAV loss.`
@@ -987,6 +1004,8 @@ function App() {
     setDrawdownYearS2(startYear + 1);
     setDrawdownAmountS1(300000);
     setDrawdownAmountS2(300000);
+    setDrawdownInflationS1(3);
+    setDrawdownInflationS2(3);
     setDrawdownOverridesS1([]);
     setDrawdownOverridesS2([]);
     setEquityRateS1(8.0);
@@ -1132,20 +1151,21 @@ function App() {
       const interimValue = startValue + eqGrowthValue + bdGrowthValue + mmfGrowthValue;
 
       let drawdownApplied = false;
-      let drawdownMagnitude = 0;
       let drawdownValue = 0;
       if (year >= correctedDrawdownYearS1 && year >= correctedDrawdownStart) {
+        const drawdownYearIndex = Math.max(0, year - correctedDrawdownYearS1);
+        const inflationMultiplier = Math.pow(1 + drawdownInflationS1 / 100, drawdownYearIndex);
+        const escalatedDrawdownAmount = drawdownAmountS1 * inflationMultiplier;
         const overrideValue = drawdownOverridesS1[i];
-        drawdownValue = overrideValue === undefined ? -drawdownAmountS1 : (overrideValue < 0 ? overrideValue : -Math.abs(overrideValue));
-        drawdownMagnitude = Math.abs(drawdownValue);
+        drawdownValue = overrideValue === undefined ? -escalatedDrawdownAmount : overrideValue;
         drawdownApplied = drawdownValue !== 0;
       }
 
       nav = interimValue + drawdownValue;
 
-      const eqEndValue = eqStartValue + eqGrowthValue - drawdownMagnitude * eqAlloc;
-      const bdEndValue = bdStartValue + bdGrowthValue - drawdownMagnitude * bdAlloc;
-      const mmfEndValue = mmfStartValue + mmfGrowthValue - drawdownMagnitude * mmfAlloc;
+      const eqEndValue = eqStartValue + eqGrowthValue + drawdownValue * eqAlloc;
+      const bdEndValue = bdStartValue + bdGrowthValue + drawdownValue * bdAlloc;
+      const mmfEndValue = mmfStartValue + mmfGrowthValue + drawdownValue * mmfAlloc;
 
       const crashApplied = year === correctedCrashYearS1;
 
@@ -1170,6 +1190,7 @@ function App() {
     correctedDrawdownStart,
     correctedDrawdownYearS1,
     drawdownAmountS1,
+    drawdownInflationS1,
     drawdownOverridesS1,
     growthTableS1
   ]);
@@ -1203,20 +1224,21 @@ function App() {
       const interimValue = startValue + eqGrowthValue + bdGrowthValue + mmfGrowthValue;
 
       let drawdownApplied = false;
-      let drawdownMagnitude = 0;
       let drawdownValue = 0;
       if (year >= correctedDrawdownYearS2 && year >= correctedDrawdownStart) {
+        const drawdownYearIndex = Math.max(0, year - correctedDrawdownYearS2);
+        const inflationMultiplier = Math.pow(1 + drawdownInflationS2 / 100, drawdownYearIndex);
+        const escalatedDrawdownAmount = drawdownAmountS2 * inflationMultiplier;
         const overrideValue = drawdownOverridesS2[i];
-        drawdownValue = overrideValue === undefined ? -drawdownAmountS2 : (overrideValue < 0 ? overrideValue : -Math.abs(overrideValue));
-        drawdownMagnitude = Math.abs(drawdownValue);
+        drawdownValue = overrideValue === undefined ? -escalatedDrawdownAmount : overrideValue;
         drawdownApplied = drawdownValue !== 0;
       }
 
       nav = interimValue + drawdownValue;
 
-      const eqEndValue = eqStartValue + eqGrowthValue - drawdownMagnitude * eqAlloc;
-      const bdEndValue = bdStartValue + bdGrowthValue - drawdownMagnitude * bdAlloc;
-      const mmfEndValue = mmfStartValue + mmfGrowthValue - drawdownMagnitude * mmfAlloc;
+      const eqEndValue = eqStartValue + eqGrowthValue + drawdownValue * eqAlloc;
+      const bdEndValue = bdStartValue + bdGrowthValue + drawdownValue * bdAlloc;
+      const mmfEndValue = mmfStartValue + mmfGrowthValue + drawdownValue * mmfAlloc;
 
       const crashApplied = year === correctedCrashYearS2;
 
@@ -1241,6 +1263,7 @@ function App() {
     correctedDrawdownStart,
     correctedDrawdownYearS2,
     drawdownAmountS2,
+    drawdownInflationS2,
     drawdownOverridesS2,
     growthTableS2
   ]);
@@ -1327,6 +1350,8 @@ function App() {
     drawdownYearS2,
     drawdownAmountS1,
     drawdownAmountS2,
+    drawdownInflationS1,
+    drawdownInflationS2,
     drawdownOverridesS1,
     drawdownOverridesS2,
     equityRateS1,
@@ -1384,6 +1409,8 @@ function App() {
     setDrawdownYearS2(snapshot.drawdownYearS2);
     setDrawdownAmountS1(snapshot.drawdownAmountS1);
     setDrawdownAmountS2(snapshot.drawdownAmountS2);
+    setDrawdownInflationS1(snapshot.drawdownInflationS1 ?? 3);
+    setDrawdownInflationS2(snapshot.drawdownInflationS2 ?? snapshot.drawdownInflationS1 ?? 3);
     setDrawdownOverridesS1(snapshot.drawdownOverridesS1);
     setDrawdownOverridesS2(snapshot.drawdownOverridesS2);
     setEquityRateS1(snapshot.equityRateS1 ?? 8.0);
@@ -1699,7 +1726,7 @@ function App() {
 
         {/* COLUMN 3: TABLES */}
         <div className="layout-column">
-          <div className="dashboard-box">
+          <div className="dashboard-box drawdown-box">
             <DrawdownPanel
               drawdownStartYear={correctedDrawdownStart}
               onDrawdownStartYearChange={setDrawdownStartYear}
@@ -1711,6 +1738,10 @@ function App() {
               onDrawdownAmountS1Change={setDrawdownAmountS1}
               drawdownAmountS2={drawdownAmountS2}
               onDrawdownAmountS2Change={setDrawdownAmountS2}
+              drawdownInflationS1={drawdownInflationS1}
+              onDrawdownInflationS1Change={setDrawdownInflationS1}
+              drawdownInflationS2={drawdownInflationS2}
+              onDrawdownInflationS2Change={setDrawdownInflationS2}
               onApply={() => {
                 setDrawdownOverridesS1([]);
                 setDrawdownOverridesS2([]);
@@ -1726,6 +1757,7 @@ function App() {
               drawdownStartYear={correctedDrawdownStart}
               drawdownYear={correctedDrawdownYearS1}
               drawdownAmount={drawdownAmountS1}
+              drawdownInflationRate={drawdownInflationS1}
               onApplyDrawdownChanges={setDrawdownOverridesS1}
             />
           </div>
@@ -1738,6 +1770,7 @@ function App() {
               drawdownStartYear={correctedDrawdownStart}
               drawdownYear={correctedDrawdownYearS2}
               drawdownAmount={drawdownAmountS2}
+              drawdownInflationRate={drawdownInflationS2}
               onApplyDrawdownChanges={setDrawdownOverridesS2}
             />
           </div>

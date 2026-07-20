@@ -149,6 +149,11 @@
   height: 415px;
 }
 
+.drawdown-box {
+  height: auto;
+  flex-shrink: 0;
+}
+
 .controls-column .dashboard-box.growth-box {
   height: 549px;
 }

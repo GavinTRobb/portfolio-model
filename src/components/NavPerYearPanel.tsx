@@ -22,6 +22,7 @@ interface Props {
   drawdownStartYear: number;
   drawdownYear: number;
   drawdownAmount: number;
+  drawdownInflationRate: number;
   onApplyDrawdownChanges?: (values: number[]) => void;
 }
 
@@ -33,6 +34,7 @@ export default function NavPerYearPanel({
   drawdownStartYear,
   drawdownYear,
   drawdownAmount,
+  drawdownInflationRate,
   onApplyDrawdownChanges
 }: Props) {
   const fmt = (v: number) =>
@@ -47,8 +49,12 @@ export default function NavPerYearPanel({
   const getDefaultDrawdownValue = (index: number) => {
     const row = navRows[index];
     if (!row) return 0;
+    const drawdownYearIndex = Math.max(0, row.year - drawdownYear);
+    const inflationMultiplier = Math.pow(1 + drawdownInflationRate / 100, drawdownYearIndex);
     const defaultDrawdown =
-      row.year >= drawdownYear && row.year >= drawdownStartYear ? drawdownAmount : 0;
+      row.year >= drawdownYear && row.year >= drawdownStartYear
+        ? drawdownAmount * inflationMultiplier
+        : 0;
     return defaultDrawdown > 0 ? -defaultDrawdown : 0;
   };
 
@@ -58,7 +64,7 @@ export default function NavPerYearPanel({
 
   useEffect(() => {
     setDraftDrawdowns(navRows.map((_, index) => formatInputValue(getDefaultDrawdownValue(index))));
-  }, [navRows.length, drawdownStartYear, drawdownYear, drawdownAmount]);
+  }, [navRows.length, drawdownStartYear, drawdownYear, drawdownAmount, drawdownInflationRate]);
 
   const parseDraftValue = (rawValue: string | undefined, fallback: number) => {
     const cleanedValue = (rawValue ?? "").replace(/,/g, "").trim();
@@ -102,16 +108,15 @@ export default function NavPerYearPanel({
       const interimValue = startValue + eqGrowth + bdGrowth + mmfGrowth;
       const defaultDrawdownValue = getDefaultDrawdownValue(idx);
       const drawdownValue = parseDraftValue(draftDrawdowns[idx], defaultDrawdownValue);
-      const drawdownMagnitude = Math.abs(drawdownValue);
       const drawdownPct =
         interimValue !== 0 ? (drawdownValue / interimValue) * 100 : 0;
       const endValue = interimValue + drawdownValue;
       const eqStartValue = startValue * ((growthRow?.equityAlloc ?? 0) / 100);
       const bdStartValue = startValue * ((growthRow?.bondAlloc ?? 0) / 100);
       const mmfStartValue = startValue * ((growthRow?.mmfAlloc ?? 0) / 100);
-      const eqEndValue = eqStartValue + eqGrowth - drawdownMagnitude * ((growthRow?.equityAlloc ?? 0) / 100);
-      const bdEndValue = bdStartValue + bdGrowth - drawdownMagnitude * ((growthRow?.bondAlloc ?? 0) / 100);
-      const mmfEndValue = mmfStartValue + mmfGrowth - drawdownMagnitude * ((growthRow?.mmfAlloc ?? 0) / 100);
+      const eqEndValue = eqStartValue + eqGrowth + drawdownValue * ((growthRow?.equityAlloc ?? 0) / 100);
+      const bdEndValue = bdStartValue + bdGrowth + drawdownValue * ((growthRow?.bondAlloc ?? 0) / 100);
+      const mmfEndValue = mmfStartValue + mmfGrowth + drawdownValue * ((growthRow?.mmfAlloc ?? 0) / 100);
 
       acc.push({
         startValue,
@@ -129,7 +134,7 @@ export default function NavPerYearPanel({
 
       return acc;
     }, []);
-  }, [draftDrawdowns, drawdownAmount, drawdownStartYear, drawdownYear, growthTable, initialPortfolioValue, navRows]);
+  }, [draftDrawdowns, drawdownAmount, drawdownInflationRate, drawdownStartYear, drawdownYear, growthTable, initialPortfolioValue, navRows]);
 
   const startValues = rowResults.map((row) => row.startValue);
   const eqGrowthValues = rowResults.map((row) => row.eqGrowth);
@@ -154,8 +159,7 @@ export default function NavPerYearPanel({
   const handleApplyDrawdownChanges = () => {
     const values = draftDrawdowns.map((rawValue, index) => {
       const fallback = getDefaultDrawdownValue(index);
-      const parsedValue = parseDraftValue(rawValue, fallback);
-      return parsedValue < 0 ? parsedValue : -Math.abs(parsedValue);
+      return parseDraftValue(rawValue, fallback);
     });
 
     onApplyDrawdownChanges?.(values);
