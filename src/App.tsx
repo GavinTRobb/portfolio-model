@@ -11,6 +11,16 @@ import ChatbotPanel from "./components/ChatbotPanel";
 import "./components/layout.css";
 import "./components/controls.css";
 
+type SimulationGrowthRow = {
+  year: number;
+  equityRate: number;
+  bondRate: number;
+  mmfRate: number;
+  equityAlloc: number;
+  bondAlloc: number;
+  mmfAlloc: number;
+};
+
 function simulate({
   portfolioValue,
   period,
@@ -22,13 +32,10 @@ function simulate({
   drawdownOverrides,
   correctedCrashYear
 }: {
-  equityRateS1,
-  bondRateS1,
-  mmfRateS1,
-  equityRateS2,
-  bondRateS2,
-  mmfRateS2,
-  growthTable: any[];
+  portfolioValue: number;
+  period: number;
+  startYear: number;
+  growthTable: SimulationGrowthRow[];
   correctedDrawdownStart: number;
   correctedDrawdownYear: number;
   drawdownAmount: number;
@@ -391,6 +398,9 @@ function App() {
     }
 
     if (keepScenario === "s1") {
+      setEquityRateS2(equityRateS1);
+      setBondRateS2(bondRateS1);
+      setMmfRateS2(mmfRateS1);
       setCrashPercentS2(crashPercentS1);
       setInterestRateChangeS2(interestRateChangeS1);
       setCrashYearS2(crashYearS1);
@@ -399,6 +409,9 @@ function App() {
       setGrowthRatesResetKeyS2((value) => value + 1);
       setGrowthEditorScenario("s1");
     } else {
+      setEquityRateS1(equityRateS2);
+      setBondRateS1(bondRateS2);
+      setMmfRateS1(mmfRateS2);
       setCrashPercentS1(crashPercentS2);
       setInterestRateChangeS1(interestRateChangeS2);
       setCrashYearS1(crashYearS2);
@@ -1575,12 +1588,22 @@ function App() {
                 setEquityRateS2(settings.equityS2);
                 setBondRateS2(settings.bondsS2);
                 setMmfRateS2(settings.mmfS2);
-                setGrowthAdjustmentsS1([]);
-                setGrowthAdjustmentsS2([]);
-                setHasManualGrowthAdjustmentsS1(false);
-                setHasManualGrowthAdjustmentsS2(false);
-                setGrowthRatesResetKeyS1((value) => value + 1);
-                setGrowthRatesResetKeyS2((value) => value + 1);
+                if (applyGrowthToBothScenarios) {
+                  setGrowthAdjustmentsS1([]);
+                  setGrowthAdjustmentsS2([]);
+                  setHasManualGrowthAdjustmentsS1(false);
+                  setHasManualGrowthAdjustmentsS2(false);
+                  setGrowthRatesResetKeyS1((value) => value + 1);
+                  setGrowthRatesResetKeyS2((value) => value + 1);
+                } else if (growthEditorScenario === "s1") {
+                  setGrowthAdjustmentsS1([]);
+                  setHasManualGrowthAdjustmentsS1(false);
+                  setGrowthRatesResetKeyS1((value) => value + 1);
+                } else {
+                  setGrowthAdjustmentsS2([]);
+                  setHasManualGrowthAdjustmentsS2(false);
+                  setGrowthRatesResetKeyS2((value) => value + 1);
+                }
               }}
             />
           </div>

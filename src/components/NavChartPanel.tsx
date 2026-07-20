@@ -121,7 +121,7 @@ export default function NavChartPanel({
             <XAxis dataKey="year" axisLine={false} tickLine={false} tickMargin={4} />
             <YAxis tickFormatter={formatTick} />
             <Tooltip
-              formatter={(value: number) => formatTick(value)}
+              formatter={(value) => formatTick(typeof value === "number" ? value : Number(value ?? 0))}
               labelFormatter={(label) => `Year ${label}`}
             />
             <Legend />

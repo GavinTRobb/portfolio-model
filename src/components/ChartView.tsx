@@ -1,10 +1,11 @@
 import * as d3 from "d3";
 import { useEffect, useRef } from "react";
 import { useSimStore } from "../state/store";
+import type { SimulationPoint } from "../core/engine";
 
 export default function ChartView() {
   const data = useSimStore((s) => s.result);
-  const ref = useRef(null);
+  const ref = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
     if (!data.length) return;
@@ -20,11 +21,11 @@ export default function ChartView() {
     const x = d3.scaleLinear().domain([0, data.length]).range([0, w]);
     const y = d3
       .scaleLinear()
-      .domain([d3.min(data, (d) => d.value), d3.max(data, (d) => d.value)])
+      .domain([d3.min(data, (d: SimulationPoint) => d.value) ?? 0, d3.max(data, (d: SimulationPoint) => d.value) ?? 0])
       .range([h, 0]);
 
     const line = d3
-      .line()
+      .line<SimulationPoint>()
       .x((d) => x(d.t))
       .y((d) => y(d.value));
 

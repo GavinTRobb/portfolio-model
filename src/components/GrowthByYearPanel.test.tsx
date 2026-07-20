@@ -15,7 +15,17 @@ describe('GrowthByYearPanel buttons', () => {
 
     render(
       <GrowthByYearPanel
+        startYear={2026}
         period={2}
+        applyToBothScenarios={true}
+        selectedScenario="s1"
+        onApplyToBothScenariosChange={vi.fn()}
+        onSelectedScenarioChange={vi.fn()}
+        crashYear={2027}
+        crashPercent={45}
+        onCrashPercentChange={vi.fn()}
+        interestRateChange={-2}
+        onInterestRateChange={vi.fn()}
         equityRate={8}
         bondRate={3.5}
         mmfRate={1.5}

@@ -1,6 +1,11 @@
+import type { ReactNode } from "react";
 import "./layout.css";
 
-export default function Layout({ children }) {
+interface Props {
+  children: ReactNode;
+}
+
+export default function Layout({ children }: Props) {
   return (
     <div className="layout-wrapper">
       <div className="layout-grid">

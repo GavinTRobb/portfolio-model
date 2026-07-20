@@ -32,6 +32,10 @@ describe('NavChartPanel', () => {
           }
         ]}
         age={55}
+        startYear={2026}
+        period={25}
+        crashYear={2027}
+        onCrashYearChange={vi.fn()}
       />
     );
 
